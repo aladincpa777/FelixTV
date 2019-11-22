@@ -12,6 +12,7 @@
  ###### Edit home.php in \application\views\front_end\ and Edit SQL Creds
  ###### Edit watch.php and tvseries_watch.php in \application\views\front_end\ and Change s.felixtv.cz into your Own Stream server
  ###### Download Video Thumbs [here](https://mega.nz/#!SKQwFajb!ByusgX_CQ-oAhOiXg3UA_TxgcfYbR1gRFZgBto7WQRw) and extract it (with folder video_thumb) into uploads\
+ ###### [Default login credetains into Administration](https://github.com/zgruza/FelixTV/blob/master/Login.txt)
 
 ## Configuration Stream-side
  ###### Put files from /stream/ into your /www/ directory then install Requirements and edit PHP-Curl limits
