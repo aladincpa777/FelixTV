@@ -1,6 +1,6 @@
 # FelixTV
 
-FelixTV is a Streaming Service that extracts data from [Streamuj.tv](http://streamuj.tv/) website.
+FelixTV is a Streaming Service that extracts data from [Streamuj.tv](http://streamuj.tv/) and [Sosac.tv](http://sosac.tv/) website.
 All user data has been Deleted, so this is "Clean" version.
 #### The whole script is in Czech language except individual parts in Administration.
 ## Requirements
