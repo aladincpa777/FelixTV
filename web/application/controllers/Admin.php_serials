@@ -1,0 +1,2603 @@
+<?php
+if (!defined('BASEPATH'))
+    exit('No direct script access allowed');
+
+
+class Admin extends CI_Controller {   
+    
+    function __construct() {
+        parent::__construct();
+        $this->load->model('common_model');
+        $this->load->database();
+
+        //cache controling
+        $this->output->set_header('Last-Modified: ' . gmdate("D, d M Y H:i:s") . ' GMT');('Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0');
+        $this->output->set_header('Pragma: no-cache');
+        $this->output->set_header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
+        
+    }
+    
+    //default index function, redirects to login/dashboard 
+    public function index(){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url() . '404', 'refresh');
+        if ($this->session->userdata('admin_is_login') == 1)
+            redirect(base_url() . 'admin/dashboard', 'refresh');
+    }
+    
+    //dashboard
+    function dashboard(){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+		/* start menu active/inactive section*/
+        $this->session->unset_userdata('active_menu');
+        $this->session->set_userdata('active_menu', '1');
+        /* end menu active/inactive section*/
+        $data['page_name']             = 'dashboard';
+        $data['page_title']            = 'admin_dashboard';
+        $this->load->view('admin/index', $data);		
+			
+    }
+
+
+    //  country
+    function country($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+        // start menu active/inactive section
+        $this->session->unset_userdata('active_menu');
+        $this->session->set_userdata('active_menu', '2');
+        // end menu active/inactive section
+
+       
+        
+        if ($param1 == 'add') {
+            $data['name']           = $this->input->post('name');
+            $data['description']    = $this->input->post('description');
+            $data['slug']           = url_title($this->input->post('name'), 'dash', TRUE);
+            $data['publication']    = $this->input->post('publication');          
+            
+            $this->db->insert('country', $data);
+            $this->session->set_flashdata('success', 'Country added successed');
+            redirect(base_url() . 'admin/country/', 'refresh');
+        }
+            
+        if ($param1 == 'update') {
+            $data['name']           = $this->input->post('name');
+            $data['description']    = $this->input->post('description');
+            $data['slug']           = url_title($this->input->post('name'), 'dash', TRUE);
+            $data['publication']    = $this->input->post('publication');
+
+            $this->db->where('country_id', $param2);
+            $this->db->update('country', $data);
+            $this->session->set_flashdata('success', 'Country update successed.');
+            redirect(base_url() . 'admin/country/', 'refresh');
+        }
+        
+            $data['page_name']      = 'country_manage';
+            $data['page_title']     = 'Country Management';
+            $data['countries']    = $this->db->get('country')->result_array(); 
+            $this->load->view('admin/index', $data);
+
+
+    }
+
+    // genre
+    function genre($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+        /* start menu active/inactive section*/
+        $this->session->unset_userdata('active_menu');
+        $this->session->set_userdata('active_menu', '3');
+        /* end menu active/inactive section*/ 
+              
+        
+        if ($param1 == 'add') {
+            $data['name']           = $this->input->post('name');
+            $data['description']    = $this->input->post('description');
+            $data['slug']           = url_title($this->input->post('name'), 'dash', TRUE);
+            $data['publication']    = $this->input->post('publication');          
+            
+            $this->db->insert('genre', $data);
+            $this->session->set_flashdata('success', 'Genre added successed');
+            redirect(base_url() . 'admin/genre/', 'refresh');
+        }
+            
+        if ($param1 == 'update') {
+            $data['name']           = $this->input->post('name');
+            $data['description']    = $this->input->post('description');
+            $data['slug']           = url_title($this->input->post('name'), 'dash', TRUE);
+            $data['publication']    = $this->input->post('publication');
+
+            $this->db->where('genre_id', $param2);
+            $this->db->update('genre', $data);
+            $this->session->set_flashdata('success', 'Genre update successed.');
+            redirect(base_url() . 'admin/genre/', 'refresh');
+        }
+        
+            $data['page_name']      = 'genre_manage';
+            $data['page_title']     = 'Genre Management';
+            $data['genres']    = $this->db->get('genre')->result_array(); 
+            $this->load->view('admin/index', $data);
+    }
+
+    function slider_setting($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '5');
+            /* end menu active/inactive section*/
+        if ($param1 == 'update') {
+            $slider_type  = $this->input->post('slider_type');
+            if($slider_type=='movie'){
+                $data['value']    =   $slider_type;
+                $this->db->where('title' , 'slider_type');
+                $this->db->update('config' , $data);
+                $data['value'] =   $this->input->post('total_movie_in_slider');
+                $this->db->where('title' , 'total_movie_in_slider');
+                $this->db->update('config' , $data);
+                
+                $data['value'] =   $this->input->post('slide_per_page');
+                $this->db->where('title' , 'slide_per_page');
+                $this->db->update('config' , $data);
+                $this->session->set_flashdata('success', 'Slider setting update successed');
+                redirect(base_url() . 'admin/slider_setting/', 'refresh');
+            }else if($slider_type=='image'){
+                $data['value']= 'image';
+                $this->db->where('title' , 'slider_type');
+                $this->db->update('config' , $data);
+                $this->session->set_flashdata('success', 'Slider setting update successed');
+                redirect(base_url() . 'admin/slider_setting/', 'refresh');
+            }else if($slider_type=='disable'){
+                $data['value']= 'disable';
+                $this->db->where('title' , 'slider_type');
+                $this->db->update('config' , $data);
+                $this->session->set_flashdata('success', 'Slider setting update successed');
+                redirect(base_url() . 'admin/slider_setting/', 'refresh');
+            }            
+        }
+            $data['page_name']      = 'slider_setting';
+            $data['page_title']     = 'Slider Setting';
+            $this->load->view('admin/index', $data);
+        }
+
+    // slider
+    function slider($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '4');
+            /* end menu active/inactive section*/ 
+
+            
+        
+        if ($param1 == 'add') {
+            $data['title']              =   $this->input->post('title');
+            $data['description']        =   $this->input->post('description');
+            $data['video_link']         =   $this->input->post('video_link');
+            $data['image_link']         =   base_url().'uploads/no_image.jpg';
+            
+            if($this->input->post('image_link')!=''){                
+                $data['image_link']     =   $this->input->post('image_link');
+            } 
+
+            $data['slug']               =   url_title($this->input->post('title'), 'dash', TRUE);
+            $data['publication']        =   $this->input->post('publication');          
+            
+            $this->db->insert('slider', $data);
+            $insert_id = $this->db->insert_id();
+            if(isset($_FILES['image']) && $_FILES['image']['name']!=''){
+                move_uploaded_file($_FILES['image']['tmp_name'], 'uploads/sliders/slider-'.$insert_id.'.jpg');
+                $data['image_link']     =       base_url().'uploads/sliders/slider-'.$insert_id.'.jpg';
+            }
+            $this->db->where('slider_id', $insert_id);
+            $this->db->update('slider', $data);
+            
+            $this->session->set_flashdata('success', 'Slider added successed');
+            redirect(base_url() . 'admin/slider/', 'refresh');
+        }
+           
+        if ($param1 == 'update') {
+            $data['title']              =   $this->input->post('title');
+            $data['description']        =   $this->input->post('description');
+            $data['video_link']         =   $this->input->post('video_link');
+            $data['image_link']         =   base_url().'uploads/no_image.jpg';
+            
+            if($this->input->post('image_link')!=''){                
+                $data['image_link']  = $this->input->post('image_link');
+            }
+
+            if(isset($_FILES['image']) && $_FILES['image']['name']!=''){
+                move_uploaded_file($_FILES['image']['tmp_name'], 'uploads/sliders/slider-'.$param2.'.jpg');
+                $data['image_link']     =       base_url().'uploads/sliders/slider-'.$param2.'.jpg';
+            }
+            $data['slug']               = url_title($this->input->post('title'), 'dash', TRUE);
+            $data['publication']        = $this->input->post('publication');
+
+            $this->db->where('slider_id', $param2);
+            $this->db->update('slider', $data);
+            $this->session->set_flashdata('success', 'Slider update successed.');
+            redirect(base_url() . 'admin/slider/', 'refresh');
+        }
+        
+            $data['page_name']      = 'slider_manage';
+            $data['page_title']     = 'Slider Management';
+            $data['sliders']    = $this->db->get('slider')->result_array(); 
+            $this->load->view('admin/index', $data);
+
+
+    }
+    // add videos or movies 
+    function videos_add(){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+        // start menu active/inactive section
+        $this->session->unset_userdata('active_menu');
+        $this->session->set_userdata('active_menu', '6');
+        // end menu active/inactive section
+        $data['page_name']      = 'videos_add';
+        $data['page_title']     = 'Videos Add'; 
+        $this->load->view('admin/index', $data);
+    }
+
+    // edit videos or movies 
+    function videos_edit($param1='',$param2=''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '6');
+            /* end menu active/inactive section*/
+
+
+            $data['param1']         = $param1;
+            $data['param2']         = $param2;
+            $data['page_name']      = 'videos_edit';
+            $data['page_title']     = 'Videos Edit => <strong>'.$this->common_model->get_title_by_videos_id($param1).'</strong>';
+            $this->load->view('admin/index', $data);
+    }
+
+    // add,edit videos or movies 
+    function videos($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+        /* start menu active/inactive section*/
+        $this->session->unset_userdata('active_menu');
+        $this->session->set_userdata('active_menu', '8');
+        /* end menu active/inactive section*/             
+        
+        if ($param1 == 'add') {
+            $data['imdbid']                 = $this->input->post('imdbid');          
+            $data['title']                  = $this->input->post('title');
+            $data['description']            = $this->input->post('description');            
+            $actors                         = $this->input->post('actor');            
+            $directors                      = $this->input->post('director');            
+            $writers                        = $this->input->post('writer');            
+            $countries                      = $this->input->post('country');            
+            $genres                         = $this->input->post('genre');
+            $video_types                    = $this->input->post('video_type');
+            if($actors !='' && $actors !=NULL){
+                $data['stars']              = implode(',',$actors);
+            }
+            if($directors !='' && $directors !=NULL){
+                $data['director']           = implode(',',$directors);
+            }
+            if($writers !='' && $writers !=NULL){
+                $data['writer']             = implode(',',$writers);
+            }
+            if($countries !='' && $countries !=NULL){
+                $data['country']            = implode(',',$countries);
+            }
+            if($genres !='' && $genres !=NULL){
+                $data['genre']              = implode(',',$genres);
+            }
+            if($video_types !='' && $video_types !=NULL){
+                $data['video_type']              = implode(',',$video_types);
+            }
+
+            $data['imdb_rating']        = $this->input->post('rating');
+            $data['release']            = $this->input->post('release');
+            
+            
+            $data['runtime']            = $this->input->post('runtime');
+            $data['video_quality']      = $this->input->post('video_quality');
+            $data['publication']        = '0';
+            if(isset($_POST['publication'])) {
+                $data['publication']    = '1';
+            }
+            
+            $data['enable_download']    = '0';
+            if(isset($_POST['enable_download'])) {
+                $data['enable_download']    = '1';
+            }
+            $data['focus_keyword']      = $this->input->post('focus_keyword');
+            $data['meta_description']   = $this->input->post('meta_description');
+            $data['tags']               = $this->input->post('tags');       
+                        
+            $this->db->insert('videos', $data);
+            $insert_id = $this->db->insert_id();
+            $slug                       = url_title($this->input->post('slug'), 'dash', TRUE);
+            $slug_num                   = $this->common_model->slug_num('videos',$slug);
+            if($slug_num > 0){
+                $slug= $slug.'-'.$insert_id;
+            }
+            $data_update['slug']               = $slug;            
+            if(isset($_FILES['thumbnail']) && $_FILES['thumbnail']['name']!=''){
+                move_uploaded_file($_FILES['thumbnail']['tmp_name'], 'uploads/video_thumb/'.$insert_id.'.jpg');                
+            }
+
+            if(isset($_FILES['poster_file']) && $_FILES['poster_file']['name']!=''){
+                move_uploaded_file($_FILES['poster_file']['tmp_name'], 'uploads/poster_image/'.$insert_id.'.jpg');                                
+            }
+
+            if($this->input->post('thumb_link')!=''){ 
+                $image_source =$this->input->post('thumb_link');
+                $save_to = 'uploads/video_thumb/'.$insert_id.'.jpg';           
+                $this->common_model->grab_image($image_source,$save_to);
+            }
+
+            if($this->input->post('poster_link')!=''){ 
+                $image_source =$this->input->post('poster_link');
+                $save_to = 'uploads/poster_image/'.$insert_id.'.jpg';           
+                $this->common_model->grab_image($image_source,$save_to);
+            }
+
+            $this->db->where('videos_id', $insert_id);
+            $this->db->update('videos', $data_update);
+            $this->load->model('email_model');
+            $this->email_model->new_movie_notification($insert_id);
+            $this->session->set_flashdata('success', 'Video added successed');
+            redirect(base_url() . 'admin/file_and_download/'.$insert_id, 'refresh');
+        }
+        else if ($param1 == 'update') {
+            $data['imdbid']             = $this->input->post('imdbid');          
+            $data['title']              = $this->input->post('title');
+            $data['description']        = $this->input->post('description');
+            $data['stars']              = implode(',',$this->input->post('actor'));
+            $data['director']           = implode(',',$this->input->post('director'));
+            $data['writer']             = implode(',',$this->input->post('writer'));
+            $data['imdb_rating']        = $this->input->post('rating');
+            $data['release']            = $this->input->post('release');
+            $data['country']            = implode(',',$this->input->post('country'));
+            $data['genre']              = implode(',',$this->input->post('genre'));
+            $data['video_type']         = implode(',',$this->input->post('video_type'));
+            $data['runtime']            = $this->input->post('runtime');
+            $data['video_quality']      = $this->input->post('video_quality');
+            $publication = $this->input->post('publication');
+            if($publication =='on'){
+                $data['publication'] = '1';
+            }else{
+                $data['publication'] = '0';
+            }
+            $enable_download            = $this->input->post('enable_download');
+            if($enable_download =='on'){
+                $data['enable_download'] = '1';
+            }else{
+                $data['enable_download'] = '0';
+            }            
+            $data['focus_keyword']      = $this->input->post('focus_keyword');
+            $data['meta_description']   = $this->input->post('meta_description');
+            $data['tags']               = $this->input->post('tags');
+            $this->db->where('videos_id', $param2);
+            $this->db->update('videos', $data);
+            $this->db->where('videos_id', $param2);
+
+            $slug                       = url_title($this->input->post('slug'), 'dash', TRUE);
+            $slug_num                   = $this->common_model->slug_num('videos',$slug);
+            if($slug_num > 1){
+                $slug= $slug.'-'.$param2;
+            }
+            $data_update['slug']               = $slug;            
+            if(isset($_FILES['thumbnail']) && $_FILES['thumbnail']['name']!=''){
+                move_uploaded_file($_FILES['thumbnail']['tmp_name'], 'uploads/video_thumb/'.$param2.'.jpg');                
+            }
+
+            if(isset($_FILES['poster_file']) && $_FILES['poster_file']['name']!=''){
+                move_uploaded_file($_FILES['poster_file']['tmp_name'], 'uploads/poster_image/'.$param2.'.jpg');                                
+            }
+
+            if($this->input->post('thumb_link')!=''){ 
+                $image_source =$this->input->post('thumb_link');
+                $save_to = 'uploads/video_thumb/'.$param2.'.jpg';           
+                $this->common_model->grab_image($image_source,$save_to);
+            }
+
+            if($this->input->post('poster_link')!=''){ 
+                $image_source =$this->input->post('poster_link');
+                $save_to = 'uploads/poster_image/'.$param2.'.jpg';           
+                $this->common_model->grab_image($image_source,$save_to);
+            }
+
+            $this->db->where('videos_id', $param2);
+            $this->db->update('videos', $data_update);
+            $this->session->set_flashdata('success', 'Video updated successed');
+            redirect(base_url() . 'admin/videos_edit/'.$param2, 'refresh');
+        }
+        $config = array();
+        $config["base_url"] = base_url() . "admin/videos";
+        $config["total_rows"] = count($this->db->get_where('videos', array('is_tvseries'=>'0'))->result_array());
+        $config["per_page"] = 10;
+        $config["uri_segment"] = 3;
+        $config['full_tag_open'] = '<ul class ="pagination">';
+        $config['full_tag_close'] = '</ul><!--pagination-->';
+
+        $config['first_link'] = '«';
+        $config['first_tag_open'] = '<li>';
+        $config['first_tag_close'] = '</li>';
+
+        $config['last_link'] = '»';
+        $config['last_tag_open'] = '<li>';
+        $config['last_tag_close'] = '</li>';
+
+        $config['next_link'] = '&rarr;';
+        $config['next_tag_open'] = '<li>';
+        $config['next_tag_close'] = '</li>';
+
+        $config['prev_link'] = '&larr;';
+        $config['prev_tag_open'] = '<li>';
+        $config['prev_tag_close'] = '</li>';
+
+        $config['cur_tag_open'] = '<li class="active"><a href="#">';
+        $config['cur_tag_close'] = '</a><div class="pagination-hvr"></div></li>';
+
+        $config['num_tag_open'] = '<li>';
+        $config['num_tag_close'] = '<div class="pagination-hvr"></div></li>';        
+
+        $this->pagination->initialize($config);
+        $data['last_row_num']=$this->uri->segment(3);
+        $page = ($this->uri->segment(3)) ? $this->uri->segment(3) : 0;   
+        $data["videos"] = $this->common_model->get_videos($config["per_page"], $page);
+        $data["links"] = $this->pagination->create_links();
+        $data['total_rows']=$config["total_rows"];
+        $data['page_name']      = 'videos_manage';
+        $data['page_title']     = 'Videos Management';             
+        $this->load->view('admin/index', $data);
+    }
+
+
+
+    // add videos or movies 
+    function tvseries_add(){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+        // start menu active/inactive section
+        $this->session->unset_userdata('active_menu');
+        $this->session->set_userdata('active_menu', '29');
+        // end menu active/inactive section
+        $data['page_name']      = 'tvseries_add';
+        $data['page_title']     = 'TV-series Add'; 
+        $this->load->view('admin/index', $data);
+    }
+
+    // edit videos or movies 
+    function tvseries_edit($param1='',$param2=''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '29');
+            /* end menu active/inactive section*/
+
+
+            $data['param1']         = $param1;
+            $data['param2']         = $param2;
+            $data['page_name']      = 'tvseries_edit';
+            $data['page_title']     = 'TV-series Edit';
+            $this->load->view('admin/index', $data);
+    }
+
+     // add,edit videos or movies 
+    function tvseries($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+        /* start menu active/inactive section*/
+        $this->session->unset_userdata('active_menu');
+        $this->session->set_userdata('active_menu', '30');
+        /* end menu active/inactive section*/             
+        
+        if ($param1 == 'add') {
+            $data['imdbid']             = $this->input->post('imdbid');          
+            $data['title']              = $this->input->post('title');
+            $data['description']        = $this->input->post('description');
+            $data['stars']              = implode(',',$this->input->post('actor'));
+            $data['director']           = implode(',',$this->input->post('director'));
+            $data['writer']             = implode(',',$this->input->post('writer'));
+            $data['imdb_rating']        = $this->input->post('rating');
+            $data['release']            = $this->input->post('release');
+            $data['country']            = implode(',',$this->input->post('country'));
+            $data['genre']              = implode(',',$this->input->post('genre'));
+            $data['is_tvseries']        = '1';
+            $data['runtime']            = $this->input->post('runtime');
+            $data['video_quality']      = $this->input->post('video_quality');
+            $data['publication']        = '0';
+            if(isset($_POST['publication'])) {
+                $data['publication']    = '1';
+            }
+            
+            $data['enable_download']    = '0';
+            if(isset($_POST['enable_download'])) {
+                $data['enable_download']    = '1';
+            }
+            $data['focus_keyword']      = $this->input->post('focus_keyword');
+            $data['meta_description']   = $this->input->post('meta_description');
+            $data['tags']               = $this->input->post('tags');       
+                        
+            $this->db->insert('videos', $data);
+            $insert_id = $this->db->insert_id();
+            $slug                       = url_title($this->input->post('slug'), 'dash', TRUE);
+            $slug_num                   = $this->common_model->slug_num('videos',$slug);
+            if($slug_num > 0){
+                $slug= $slug.'-'.$insert_id;
+            }
+            $data_update['slug']               = $slug;            
+            if(isset($_FILES['thumbnail']) && $_FILES['thumbnail']['name']!=''){
+                move_uploaded_file($_FILES['thumbnail']['tmp_name'], 'uploads/video_thumb/'.$insert_id.'.jpg');                
+            }
+
+            if(isset($_FILES['poster_file']) && $_FILES['poster_file']['name']!=''){
+                move_uploaded_file($_FILES['poster_file']['tmp_name'], 'uploads/poster_image/'.$insert_id.'.jpg');                                
+            }
+
+            if($this->input->post('thumb_link')!=''){ 
+                $image_source =$this->input->post('thumb_link');
+                $save_to = 'uploads/video_thumb/'.$insert_id.'.jpg';           
+                $this->common_model->grab_image($image_source,$save_to);
+            }
+
+            if($this->input->post('poster_link')!=''){ 
+                $image_source =$this->input->post('poster_link');
+                $save_to = 'uploads/poster_image/'.$insert_id.'.jpg';           
+                $this->common_model->grab_image($image_source,$save_to);
+            }
+
+            $this->db->where('videos_id', $insert_id);
+            $this->db->update('videos', $data_update);
+            $this->load->model('email_model');
+            $this->email_model->new_movie_notification($insert_id);
+            $this->session->set_flashdata('success', 'Tv Series added successed');
+            redirect(base_url() . 'admin/seasons_manage/'.$insert_id, 'refresh');
+        }
+        else if ($param1 == 'update') {
+            $data['imdbid']             = $this->input->post('imdbid');          
+            $data['title']              = $this->input->post('title');
+            $data['description']        = $this->input->post('description');
+            $data['stars']              = implode(',',$this->input->post('actor'));
+            $data['director']           = implode(',',$this->input->post('director'));
+            $data['writer']             = implode(',',$this->input->post('writer'));
+            $data['imdb_rating']        = $this->input->post('rating');
+            $data['release']            = $this->input->post('release');
+            $data['country']            = implode(',',$this->input->post('country'));
+            $data['genre']              = implode(',',$this->input->post('genre'));
+            $data['is_tvseries']        = '1';
+            $data['runtime']            = $this->input->post('runtime');
+            $data['video_quality']      = $this->input->post('video_quality');
+            $publication = $this->input->post('publication');
+            if($publication =='on'){
+                $data['publication'] = '1';
+            }else{
+                $data['publication'] = '0';
+            }
+            $enable_download            = $this->input->post('enable_download');
+            if($enable_download =='on'){
+                $data['enable_download'] = '1';
+            }else{
+                $data['enable_download'] = '0';
+            }            
+            $data['focus_keyword']      = $this->input->post('focus_keyword');
+            $data['meta_description']   = $this->input->post('meta_description');
+            $data['tags']               = $this->input->post('tags');
+            $this->db->where('videos_id', $param2);
+            $this->db->update('videos', $data);
+            $this->db->where('videos_id', $param2);
+
+            $slug                       = url_title($this->input->post('slug'), 'dash', TRUE);
+            $slug_num                   = $this->common_model->slug_num('videos',$slug);
+            if($slug_num > 1){
+                $slug= $slug.'-'.$param2;
+            }
+            $data_update['slug']               = $slug;            
+            if(isset($_FILES['thumbnail']) && $_FILES['thumbnail']['name']!=''){
+                move_uploaded_file($_FILES['thumbnail']['tmp_name'], 'uploads/video_thumb/'.$param2.'.jpg');                
+            }
+
+            if(isset($_FILES['poster_file']) && $_FILES['poster_file']['name']!=''){
+                move_uploaded_file($_FILES['poster_file']['tmp_name'], 'uploads/poster_image/'.$param2.'.jpg');                                
+            }
+
+            if($this->input->post('thumb_link')!=''){ 
+                $image_source =$this->input->post('thumb_link');
+                $save_to = 'uploads/video_thumb/'.$param2.'.jpg';           
+                $this->common_model->grab_image($image_source,$save_to);
+            }
+
+            if($this->input->post('poster_link')!=''){ 
+                $image_source =$this->input->post('poster_link');
+                $save_to = 'uploads/poster_image/'.$param2.'.jpg';           
+                $this->common_model->grab_image($image_source,$save_to);
+            }
+
+            $this->db->where('videos_id', $param2);
+            $this->db->update('videos', $data_update);
+            $this->session->set_flashdata('success', 'TV Series updated successed');
+            redirect(base_url() . 'admin/tvseries_edit/'.$param2, 'refresh');
+        }
+        $config = array();
+        $config["base_url"]         = base_url() . "admin/tvseries";
+        $config["total_rows"]       = count($this->db->get_where('videos', array('is_tvseries'=>'1'))->result_array());
+        $config["per_page"]         = 10;
+        //$config['use_page_numbers'] = TRUE;
+        $config["uri_segment"]      = 3;
+        $config['full_tag_open']    = '<ul class ="pagination">';
+        $config['full_tag_close']   = '</ul><!--pagination-->';
+        $config['first_link']       = '«';
+        $config['first_tag_open']   = '<li>';
+        $config['first_tag_close']  = '</li>';
+        $config['last_link']        = '»';
+        $config['last_tag_open']    = '<li>';
+        $config['last_tag_close']   = '</li>';
+        $config['next_link']        = '&rarr;';
+        $config['next_tag_open']    = '<li>';
+        $config['next_tag_close']   = '</li>';
+        $config['prev_link']        = '&larr;';
+        $config['prev_tag_open']    = '<li>';
+        $config['prev_tag_close']   = '</li>';
+        $config['cur_tag_open']     = '<li class="active"><a href="#">';
+        $config['cur_tag_close']    = '</a><div class="pagination-hvr"></div></li>';
+        $config['num_tag_open']     = '<li>';
+        $config['num_tag_close']    = '<div class="pagination-hvr"></div></li>';        
+
+        $this->pagination->initialize($config);
+        $data['last_row_num']       = $this->uri->segment(3);
+        $page                       = ($this->uri->segment(3)) ? $this->uri->segment(3) : 0;   
+        $data["videos"]             = $this->common_model->get_tvseries($config["per_page"], $page);
+        $data["links"]              = $this->pagination->create_links();
+        $data['total_rows']         = $config["total_rows"];
+        $data['page_name']          = 'tvseries_manage';
+        $data['page_title']         = 'TV-Series Management';             
+        $this->load->view('admin/index', $data);
+    }
+
+    function seasons_manage($param1='',$param2=''){
+        //$this->common_model->clear_cache();
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '30');
+            /* end menu active/inactive section*/
+
+            /*if($param2 =='' || $param2 ==NULL){
+                redirect(base_url() . 'error', 'refresh');
+            }*/
+            //var_dump($param1,$param2);
+            if ($param1 == 'add') {            
+            $data['videos_id']             = $this->input->post('videos_id');
+            $data['seasons_name']        = $this->input->post('seasons_name');            
+            
+            $this->db->insert('seasons', $data);
+            $this->session->set_flashdata('success', 'Seasons added successed');
+            redirect(base_url() . 'admin/seasons_manage/'.$data['videos_id'], 'refresh');
+        }
+        if ($param1 == 'update') {
+            
+            
+            $data['videos_id']             = $this->input->post('videos_id');
+            $data['seasons_name']        = $this->input->post('seasons_name');
+            
+            $this->db->where('seasons_id', $param2);
+            $this->db->update('seasons', $data);
+            $this->session->set_flashdata('success', 'Seasons update successed.');
+            redirect(base_url() . 'admin/seasons_manage/'.$data['videos_id'], 'refresh');
+        }
+
+            $data['param1']         = $param1;
+            $data['param2']         = $param2;
+            $data['slug']           = $this->common_model->get_slug_by_videos_id($param1);
+            $data['page_name']      = 'seasons_manage';
+            $data['page_title']     = $this->common_model->get_title_by_videos_id($param1);
+            $this->load->view('admin/index', $data);
+    }
+
+    function episodes_manage($param1='',$param2=''){
+        //$this->common_model->clear_cache();
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '30');
+            /* end menu active/inactive section*/
+
+
+            $data['param1']         = $param1;
+            $data['param2']         = $param2;
+            $data['slug']           = $this->common_model->get_slug_by_videos_id($param1);
+            $data['page_name']      = 'episodes_manage';
+            $data['page_title']     = 'Eisodes for '.$this->common_model->get_title_by_videos_id($param1).' <strong>'.$this->common_model->get__seasons_name_by_id($param2).'</strong>';
+            $this->load->view('admin/index', $data);
+    }
+
+
+
+
+    function file_and_download($param1 = '', $param2 = ''){
+    if ($this->session->userdata('admin_is_login') != 1)
+        redirect(base_url(), 'refresh');
+        /* start menu active/inactive section*/
+        $this->session->unset_userdata('active_menu');
+        $this->session->set_userdata('active_menu', '8');
+        /* end menu active/inactive section*/
+        if ($param1 == 'update') {
+            $video_id = $param2;
+            $file_type= 'upload';
+            $video_file_type    = $this->input->post('video_file_type');
+            $video_file         = $this->input->post('video_file');
+            $link_name          = $this->input->post('link_name');
+            $link               = $this->input->post('link');
+            $this->db->where('videos_id', $video_id);
+            $this->db->delete('video_file');
+            for($i=0;$i<sizeof($video_file_type);$i++){                
+                $file_data['videos_id']     = $video_id;
+                $file_data['file_source']   = $video_file_type[$i];
+                $file_data['source_type']   = 'link';
+                if($video_file_type[$i]     == 'upload'){
+                   $file_data['source_type'] = $this->common_model->get_extension($video_file[$i]);
+                   copy('uploads/temp/'.$video_file[$i], 'uploads/videos/'.$video_file[$i]);
+                }
+                $file_data['file_url'] = $video_file[$i];
+                $this->db->insert('video_file', $file_data);
+                //var_dump($file_data);
+            }
+            $this->db->where('videos_id', $video_id);
+            $this->db->delete('download_link');
+            for($i=0;$i<sizeof($link);$i++){
+                $download_data['videos_id'] = $video_id;
+                $download_data['link_name'] = $link_name[$i];
+                $download_data['link']      = $link[$i];
+                //$this->db->insert('download_link', $download_data);
+                //var_dump($download_data);
+            }
+            //var_dump($link);
+        }
+        $data['param1']         = $param1;
+        $data['param2']         = $param2;
+        $data['slug']           = $this->common_model->get_slug_by_videos_id($param1);
+        $data['page_name']      = 'file_and_download';
+        $data['page_title']     = 'Video upload & Download => <strong>'.$this->common_model->get_title_by_videos_id($param1).'</strong>';            
+        $this->load->view('admin/index', $data);
+    }
+
+    // videos or movies types
+    function video_type($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '9');
+            /* end menu active/inactive section*/ 
+        
+        if ($param1 == 'add') {
+            
+            $data['video_type']             = $this->input->post('video_type');
+            $data['video_type_desc']        = $this->input->post('video_type_desc');
+            $data['primary_menu']           = $this->input->post('primary_menu');
+            $data['footer_menu']            = $this->input->post('footer_menu');           
+            
+            $this->db->insert('video_type', $data);
+
+            $insert_id                      = $this->db->insert_id();
+            $slug                           = url_title($this->input->post('video_type'), 'dash', TRUE);
+            $slug_num                       = $this->common_model->slug_num('video_type',$slug);
+            if($slug_num > 0){
+                $slug= $slug.'-'.$insert_id;
+            }
+            $data_update['slug']               = $slug;
+            $this->db->where('video_type_id', $insert_id);
+            $this->db->update('video_type', $data_update);
+
+            $this->session->set_flashdata('success', 'Video type added successed');
+            redirect(base_url() . 'admin/video_type/', 'refresh');
+        }
+        if ($param1 == 'update') {         
+            
+            $data['video_type']             = $this->input->post('video_type');
+            $data['video_type_desc']        = $this->input->post('video_type_desc');
+            $data['primary_menu']           = $this->input->post('primary_menu');
+            $data['footer_menu']            = $this->input->post('footer_menu');            
+            $this->db->where('video_type_id', $param2);
+            $this->db->update('video_type', $data);
+            $this->session->set_flashdata('success', 'Video type update successed.');
+            redirect(base_url() . 'admin/video_type/', 'refresh');
+        }      
+        
+            $data['page_name']      = 'video_type_manage';
+            $data['page_title']     = 'Videos Type Management';
+            $data['video_types']    = $this->db->get('video_type')->result_array();             
+            $this->load->view('admin/index', $data);
+
+
+    }
+    // videos or movies types
+    function video_quality($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '24');
+            /* end menu active/inactive section*/ 
+        
+        if ($param1 == 'add') {
+            
+            $data['quality']                = $this->input->post('quality');
+            $data['description']            = $this->input->post('description');            
+            
+            $this->db->insert('quality', $data);
+            $this->session->set_flashdata('success', 'Video quality added successed');
+            redirect(base_url() . 'admin/video_quality/', 'refresh');
+        }
+        if ($param1 == 'update') {
+            
+            
+            $data['quality']                = $this->input->post('quality');
+            $data['description']            = $this->input->post('description'); 
+            
+            $this->db->where('quality_id', $param2);
+            $this->db->update('quality', $data);
+            $this->session->set_flashdata('success', 'Video quality update successed.');
+            redirect(base_url() . 'admin/video_quality/', 'refresh');
+        }      
+        
+            $data['page_name']      = 'video_quality_manage';
+            $data['page_title']     = 'Videos quality Management';
+            $data['quality']        = $this->db->get('quality')->result_array();             
+            $this->load->view('admin/index', $data);
+
+
+    }
+
+    // videos or movies types
+    function comments($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '31');
+            /* end menu active/inactive section*/ 
+        if ($param1 == 'update_movie') {
+            $data['comment']             = $this->input->post('comment');
+            $data['publication']        = $this->input->post('publication');                        
+            $this->db->where('comments_id', $param2);
+            $this->db->update('comments', $data);
+            $this->session->set_flashdata('success', 'Comments update successed.');
+            redirect(base_url() . 'admin/comments/', 'refresh');
+        }else if ($param1 == 'update_post') {
+            $data['comment']             = $this->input->post('comment');
+            $data['publication']        = $this->input->post('publication');                        
+            $this->db->where('post_comments_id', $param2);
+            $this->db->update('post_comments', $data);
+            $this->session->set_flashdata('success', 'Comments update successed.');
+            redirect(base_url() . 'admin/comments/', 'refresh');
+        }else if($param1 == 'post_comments'){
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '33');
+            if($param2 != '' && $param2!=NULL ){
+                $data['type']      = $param2;
+            }
+            else{
+                $data['type']      = '';
+            }     
+        
+            $data['page_name']      = 'post_comments_manage';
+            $data['page_title']     = 'Post Comments Management';             
+            $this->load->view('admin/index', $data);
+        }else{
+            if($param1 != '' && $param1!=NULL ){
+                $data['type']      = $param1;
+            }
+            else{
+                $data['type']      = '';
+            }     
+        
+            $data['page_name']      = 'comments_manage';
+            $data['page_title']     = 'Movie/TV-Series Comments Management';             
+            $this->load->view('admin/index', $data);
+        }
+    }
+
+    function comments_setting($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '32');
+            /* end menu active/inactive section*/
+        if ($param1 == 'update') {
+            $data['value'] = $this->input->post('comments_method');
+            $this->db->where('title' , 'comments_method');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('comments_approval');
+            $this->db->where('title' , 'comments_approval');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('facebook_comment_appid');
+            $this->db->where('title' , 'facebook_comment_appid');
+            $this->db->update('config' , $data);
+
+            $this->session->set_flashdata('success', 'Comments setting update successed');
+            redirect(base_url() . 'admin/comments_setting/', 'refresh');
+                       
+        }
+            $data['page_name']      = 'comments_setting';
+            $data['page_title']     = 'Comments Setting';
+            $this->load->view('admin/index', $data);
+        }
+
+
+
+    // add custom page
+    function pages_add(){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '10');
+            /* end menu active/inactive section*/
+
+
+            $data['page_name']      = 'pages_add';
+            $data['page_title']     = 'Page Add'; 
+            $this->load->view('admin/index', $data);
+    }
+    // edit custom page
+    function pages_edit($param1='',$param2=''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '9');
+            /* end menu active/inactive section*/
+
+
+            $data['param1']         = $param1;
+            $data['param2']         = $param2;
+            $data['page_name']      = 'pages_edit';
+            $data['page_title']     = 'page Edit';
+            $this->load->view('admin/index', $data);
+    }
+
+    // add,update custom page
+    function pages($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '11');
+            /* end menu active/inactive section*/ 
+
+         
+        
+        if ($param1 == 'add') {            
+            $data['page_title']         = $this->input->post('page_title');
+            $data['content']            = $this->input->post('content');
+            $data['primary_menu']       = $this->input->post('primary_menu');
+            $data['footer_menu']        = $this->input->post('footer_menu');
+            $data['focus_keyword']      = $this->input->post('focus_keyword');
+            $data['meta_description']   = $this->input->post('meta_description');
+            $data['publication']        = $this->input->post('publication');
+            
+            $this->db->insert('page', $data);
+            $insert_id = $this->db->insert_id();
+
+            $slug                       = url_title($this->input->post('slug'), 'dash', TRUE);
+            $slug_num                 = $this->common_model->slug_num('page',$slug);
+            if($slug_num > 0){
+                $slug= $slug.'-'.$insert_id;
+            }
+            $data['slug']               = $slug;
+            $this->db->where('page_id', $insert_id);
+            $this->db->update('page', $data);
+
+
+            $this->session->set_flashdata('success', 'Page added successed');
+            redirect(base_url() . 'admin/pages/', 'refresh');
+        }
+        else if ($param1 == 'update') {
+            $slug                       = url_title($this->input->post('slug'), 'dash', TRUE);           
+            $data['page_title']         = $this->input->post('page_title');
+            $data['content']            = $this->input->post('content');
+            $data['primary_menu']       = $this->input->post('primary_menu');
+            $data['footer_menu']        = $this->input->post('footer_menu');
+            $data['focus_keyword']      = $this->input->post('focus_keyword');
+            $data['meta_description']   = $this->input->post('meta_description');                      
+            $data['slug']               = $slug;
+            $data['publication']        = $this->input->post('publication');      
+
+
+            $this->db->where('page_id', $param2);
+            $this->db->update('page', $data);
+
+            $slug_num                 = $this->common_model->slug_num('page',$slug);
+            if($slug_num > 1){
+                $slug= $slug.'-'.$param2;
+            }
+            $data['slug']               = $slug;
+            $this->db->where('page_id', $param2);
+            $this->db->update('page', $data);
+
+            $this->session->set_flashdata('success', 'Page update successed.');
+            redirect(base_url() . 'admin/pages/', 'refresh');
+        }
+        else{
+            if($param1 != '' && $param1!=NULL ){
+                $data['type']      = $param1;
+            }
+            else{
+                $data['type']      = '';
+            }
+        }
+        
+            $data['page_name']      = 'pages_manage';
+            $data['page_title']     = 'Post Management';          
+            $this->load->view('admin/index', $data);
+
+
+    }
+
+    // add blog post
+
+    function posts_add(){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '12');
+            /* end menu active/inactive section*/
+
+
+            $data['page_name']      = 'posts_add';
+            $data['page_title']     = 'Posts Add'; 
+            $this->load->view('admin/index', $data);
+    }
+    // edit blog post
+    function posts_edit($param1='',$param2=''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '12');
+            /* end menu active/inactive section*/
+
+
+            $data['param1']         = $param1;
+            $data['param2']         = $param2;
+            $data['page_name']      = 'posts_edit';
+            $data['page_title']     = 'Post Edit';
+            $this->load->view('admin/index', $data);
+    }
+
+    // add,update blog post
+    function posts($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '13');
+            /* end menu active/inactive section*/   
+        
+        if ($param1 == 'add') {            
+            $data['post_title']              = $this->input->post('post_title');
+            $data['content']        = $this->input->post('content');
+            $data['focus_keyword']      = $this->input->post('focus_keyword');
+            $data['meta_description']   = $this->input->post('meta_description');
+            $data['category_id']         = implode(',',$this->input->post('category_id'));
+            $data['publication']        = $this->input->post('publication');
+            if($this->input->post('thumb_link')!=''){                
+                $data['image_link']     = $this->input->post('thumb_link');
+            }     
+
+            
+            $this->db->insert('posts', $data);
+            $insert_id = $this->db->insert_id();          
+
+            $slug                       = url_title($this->input->post('slug'), 'dash', TRUE);
+            $slug_num                   = $this->common_model->slug_num('videos',$slug);
+            if($slug_num > 0){
+                $slug= $slug.'-'.$insert_id;
+            }
+            $data['slug']            = $slug;
+            $data['image_link']         = base_url().'uploads/no_image.jpg';
+            if(isset($_FILES['thumbnail']) && $_FILES['thumbnail']['name']!=''){
+                move_uploaded_file($_FILES['thumbnail']['tmp_name'], 'uploads/post_thumb/'.$slug.'.jpg');
+                $data['image_link']     = base_url().'uploads/post_thumb/'.$slug.'.jpg';
+                $source='uploads/post_thumb/'.$slug.'.jpg';
+                $destination='uploads/post_thumb/small/'.$slug.'.jpg';
+                $this->common_model->create_small_thumbnail($source, $destination, "150","150");
+            }
+            $this->db->where('posts_id', $insert_id);
+            $this->db->update('posts', $data);
+
+
+            
+            
+            $this->session->set_flashdata('success', 'Post added successed');
+            redirect(base_url() . 'admin/posts/', 'refresh');
+        }
+        else if ($param1 == 'update') {
+            $data['post_title']              = $this->input->post('post_title');
+            $data['content']        = $this->input->post('content');
+            $data['focus_keyword']      = $this->input->post('focus_keyword');
+            $data['meta_description']   = $this->input->post('meta_description');
+            $data['category_id']         = implode(',',$this->input->post('category_id'));
+            $data['publication']        = $this->input->post('publication');
+            if($this->input->post('thumb_link')!=''){                
+                $data['image_link']     = $this->input->post('thumb_link');
+            }
+            $this->db->where('posts_id', $param2);
+            $this->db->update('posts', $data);
+            $slug                       = url_title($this->input->post('slug'), 'dash', TRUE);
+            $slug_num                   = $this->common_model->slug_num('videos',$slug);
+            if($slug_num > 1){
+                $slug= $slug.'-'.$param2;
+            }
+            $data['slug']            = $slug;
+            if(isset($_FILES['thumbnail']) && $_FILES['thumbnail']['name']!=''){
+                move_uploaded_file($_FILES['thumbnail']['tmp_name'], 'uploads/post_thumb/'.$slug.'.jpg');
+                $data['image_link']     = base_url().'uploads/post_thumb/'.$slug.'.jpg';
+                $source='uploads/post_thumb/'.$slug.'.jpg';
+                $destination='uploads/post_thumb/small/'.$slug.'.jpg';
+                $this->common_model->create_small_thumbnail($source, $destination, "150","150");
+            }
+            $this->db->where('posts_id', $param2);
+            $this->db->update('posts', $data);
+
+
+            $this->session->set_flashdata('success', 'Post update successed.');
+            redirect(base_url() . 'admin/posts/', 'refresh');
+        }
+        else{
+            if($param1 != '' && $param1!=NULL ){
+                $data['type']      = $param1;
+            }
+            else{
+                $data['type']      = '';
+            }
+        }
+        
+            $data['page_name']      = 'posts_manage';
+            $data['page_title']     = 'Post Management';          
+            $this->load->view('admin/index', $data);
+
+
+    }
+    // post category
+    function post_category($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '14');
+            /* end menu active/inactive section*/   
+        
+        if ($param1 == 'add') {
+            
+            $data['category']             = $this->input->post('category');
+            $data['category_desc']        = $this->input->post('category_desc');           
+            
+            $this->db->insert('post_category', $data);
+            $this->session->set_flashdata('success', 'Post Category added successed');
+            redirect(base_url() . 'admin/post_category/', 'refresh');
+        }
+        if ($param1 == 'update') {           
+            
+            $data['category']             = $this->input->post('category');
+            $data['category_desc']        = $this->input->post('category_desc');
+            
+            $this->db->where('post_category_id', $param2);
+            $this->db->update('post_category', $data);
+            $this->session->set_flashdata('success', 'Post category update successed.');
+            redirect(base_url() . 'admin/post_category/', 'refresh');
+        }  
+        
+            $data['page_name']      = 'post_category_manage';
+            $data['page_title']     = 'Post Category Management';
+            $data['post_categories']    = $this->db->get('post_category')->result_array();             
+            $this->load->view('admin/index', $data);
+    }
+
+    // users
+    function manage_user($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '15');
+            /* end menu active/inactive section*/ 
+
+            /* add new access */   
+        
+        if ($param1 == 'add') {
+            $data['name']           = $this->input->post('name');
+            $data['username']       = $this->input->post('username');
+            $data['password']       = md5($this->input->post('password'));
+            $data['email']          = $this->input->post('email');
+            $data['role']           = $this->input->post('role');           
+            
+            $this->db->insert('user', $data);
+            $this->session->set_flashdata('success', 'User added successed');
+            redirect(base_url() . 'admin/manage_user/', 'refresh');
+        }
+        if ($param1 == 'update') {
+            $data['name']           = $this->input->post('name');
+            $data['username']       = $this->input->post('username');
+            if($this->input->post('password')!='' || $this->input->post('password')!=NULL){
+                $data['password']   = md5($this->input->post('password'));
+            }
+            
+            $data['email']          = $this->input->post('email');
+            $data['role']           = $this->input->post('role');
+
+            $this->db->where('user_id', $param2);
+            $this->db->update('user', $data);
+            $this->session->set_flashdata('success', 'User update successed.');
+            redirect(base_url() . 'admin/manage_user/', 'refresh');
+        }       
+
+        if ($param1 == 'delete') {
+            $response = array();
+            $user_id           = $this->input->post('user_id');
+            $this->db->where('user_id', $user_id);
+            $run=$this->db->delete('user');
+            if($run){
+				$response['status']  = 'success';
+				$response['message'] = 'Product Deleted Successfully ...';
+			}
+			else {
+				$response['status']  = 'error';
+				$response['message'] = 'Unable to delete product ...';
+			}
+				echo json_encode($response);
+        }
+        
+            $data['page_name']      = 'user_manage';
+            $data['page_title']     = 'User Management';
+            $data['users']    = $this->db->get('user')->result_array(); 
+            $this->load->view('admin/index', $data);
+    }
+
+    // users
+    function manage_star($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '25');
+            /* end menu active/inactive section*/ 
+
+            /* add new access */   
+        
+        if ($param1 == 'add') {
+            $star_name                      = trim($this->input->post('star_name'));
+            if($this->db->get_where('star',array('star_name'=>$star_name))->num_rows() > 0){
+                $this->session->set_flashdata('error', 'Star Already exist.');
+                redirect(base_url() . 'admin/manage_star/', 'refresh');
+            }else{
+                $data['star_name']              = $star_name;
+                $data['slug']                   = $this->common_model->get_seo_url($star_name);
+                $data['star_type']              = $this->input->post('star_type');
+                $data['star_desc']              = $this->input->post('star_desc');   
+                $this->db->insert('star', $data);
+                $insert_id = $this->db->insert_id();
+                if(isset($_FILES['photo']) && $_FILES['photo']['name']!=''){
+                    move_uploaded_file($_FILES['photo']['tmp_name'], 'uploads/star_image/'.$insert_id.'.jpg');
+                }
+            }
+            redirect(base_url() . 'admin/manage_star/', 'refresh');          
+            
+        }
+        if ($param1 == 'update') {
+            $star_name                      = trim($this->input->post('star_name'));
+            if($this->db->get_where('star',array('star_name'=>$star_name))->num_rows() > 1){
+                $this->session->set_flashdata('error', 'Duplicate Star exist.');
+                redirect(base_url() . 'admin/manage_star/', 'refresh');
+            }else{
+                $data['star_name']              = $star_name;
+                $data['slug']                   = $this->common_model->get_seo_url($star_name);
+                $data['star_type']              = $this->input->post('star_type');
+                $data['star_desc']              = $this->input->post('star_desc');
+                $this->db->where('star_id', $param2);
+                $this->db->update('star', $data);
+                if(isset($_FILES['photo']) && $_FILES['photo']['name']!=''){
+                    move_uploaded_file($_FILES['photo']['tmp_name'], 'uploads/star_image/'.$param2.'.jpg');
+                }
+                redirect(base_url() . 'admin/manage_star/', 'refresh');
+            }
+            
+        }
+
+
+        $config = array();
+        $config["base_url"] = base_url() . "admin/manage_star";
+        $config["total_rows"] = count($this->db->get_where('star', array('status'=>'1'))->result_array());
+        $config["per_page"] = 20;
+        $config["uri_segment"] = 3;
+        $config['full_tag_open'] = '<ul class ="pagination">';
+        $config['full_tag_close'] = '</ul><!--pagination-->';
+
+        $config['first_link'] = '«';
+        $config['first_tag_open'] = '<li>';
+        $config['first_tag_close'] = '</li>';
+
+        $config['last_link'] = '»';
+        $config['last_tag_open'] = '<li>';
+        $config['last_tag_close'] = '</li>';
+
+        $config['next_link'] = '&rarr;';
+        $config['next_tag_open'] = '<li>';
+        $config['next_tag_close'] = '</li>';
+
+        $config['prev_link'] = '&larr;';
+        $config['prev_tag_open'] = '<li>';
+        $config['prev_tag_close'] = '</li>';
+
+        $config['cur_tag_open'] = '<li class="active"><a href="#">';
+        $config['cur_tag_close'] = '</a><div class="pagination-hvr"></div></li>';
+
+        $config['num_tag_open'] = '<li>';
+        $config['num_tag_close'] = '<div class="pagination-hvr"></div></li>';        
+
+        $this->pagination->initialize($config);
+        $data['last_row_num']=$this->uri->segment(3);
+        $page = ($this->uri->segment(3)) ? $this->uri->segment(3) : 0;   
+        $data["stars"] = $this->common_model->get_stars($config["per_page"], $page);
+        $data["links"] = $this->pagination->create_links();
+        $data['total_rows']=$config["total_rows"];
+        $data['page_name']      = 'star_manage';
+        $data['page_title']     = 'Star Management';             
+        $this->load->view('admin/index', $data);
+    }
+
+    function tv_series_setting($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+        /* start menu active/inactive section*/
+        $this->session->unset_userdata('active_menu');
+        $this->session->set_userdata('active_menu', '28');
+        /* end menu active/inactive section*/
+        if ($param1 == 'update') {
+            $publish = $this->input->post('tv_series_publish');
+            if($publish =='on'){
+                $data['value'] = '1';
+                $this->db->where('title' , 'tv_series_publish');
+                 $this->db->update('config' , $data);
+            }else{
+                $data['value'] = '0';
+                 $this->db->where('title' , 'tv_series_publish');
+                 $this->db->update('config' , $data);
+             }
+
+             $tv_series_pin_primary_menu = $this->input->post('tv_series_pin_primary_menu');
+            if($tv_series_pin_primary_menu =='on'){
+                $data['value'] = '1';
+                $this->db->where('title' , 'tv_series_pin_primary_menu');
+                 $this->db->update('config' , $data);
+            }else{
+                $data['value'] = '0';
+                 $this->db->where('title' , 'tv_series_pin_primary_menu');
+                 $this->db->update('config' , $data);
+             }
+
+             $tv_series_pin_footer_menu = $this->input->post('tv_series_pin_footer_menu');
+            if($tv_series_pin_footer_menu =='on'){
+                $data['value'] = '1';
+                $this->db->where('title' , 'tv_series_pin_footer_menu');
+                 $this->db->update('config' , $data);
+            }else{
+                $data['value'] = '0';
+                 $this->db->where('title' , 'tv_series_pin_footer_menu');
+                 $this->db->update('config' , $data);
+             }
+
+             
+             $data['value'] = $this->input->post('tv_series_title');
+             $this->db->where('title' , 'tv_series_title');
+             $this->db->update('config' , $data);
+             
+             $data['value'] = $this->input->post('tv_series_keyword');
+             $this->db->where('title' , 'tv_series_keyword');
+             $this->db->update('config' , $data);
+
+             $data['value'] = $this->input->post('tv_series_meta_description');
+             $this->db->where('title' , 'tv_series_meta_description');
+             $this->db->update('config' , $data);
+
+             $this->session->set_flashdata('success', 'Setting update successed.');           
+             redirect(base_url() . 'admin/tv_series_setting/', 'refresh');
+        } 
+
+        $data['page_name']      = 'tv_series_setting';
+        $data['page_title']     = 'Live TV Setting'; 
+        $this->load->view('admin/index', $data);
+    }
+
+
+    // general setting
+    function general_setting($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '16');
+            /* end menu active/inactive section*/
+
+            if ($param1 == 'update') {     
+             
+
+             $data['value'] = $this->input->post('purchase_code');
+             $this->db->where('title' , 'purchase_code');
+             $this->db->update('config' , $data);
+
+             $data['value'] = $this->input->post('site_name');
+             $this->db->where('title' , 'site_name');
+             $this->db->update('config' , $data);
+             
+             $data['value'] = $this->input->post('site_url');
+             $this->db->where('title' , 'site_url');
+             $this->db->update('config' , $data);
+             
+             $data['value'] = $this->input->post('system_email');
+             $this->db->where('title' , 'system_email');
+             $this->db->update('config' , $data);
+             
+             $data['value'] = $this->input->post('business_address');
+             $this->db->where('title' , 'business_address');
+             $this->db->update('config' , $data);
+
+             $data['value'] = $this->input->post('business_phone');
+             $this->db->where('title' , 'business_phone');
+             $this->db->update('config' , $data);
+
+             $data['value'] = $this->input->post('contact_email');
+             $this->db->where('title' , 'contact_email');
+             $this->db->update('config' , $data);
+
+             $data['value'] = $this->input->post('map_api');
+             $this->db->where('title' , 'map_api');
+             $this->db->update('config' , $data);
+
+             $data['value'] = $this->input->post('map_lat');
+             $this->db->where('title' , 'map_lat');
+             $this->db->update('config' , $data);
+
+             $data['value'] = $this->input->post('map_lng');
+             $this->db->where('title' , 'map_lng');
+             $this->db->update('config' , $data);
+
+             $data['value'] = $this->input->post('front_end_theme');
+             $this->db->where('title' , 'front_end_theme');
+             $this->db->update('config' , $data);
+
+             $data['value'] = $this->input->post('blog_enable');
+             $this->db->where('title' , 'blog_enable');
+             $this->db->update('config' , $data);
+
+             $data['value'] = $this->input->post('blog_title');
+             $this->db->where('title' , 'blog_title');
+             $this->db->update('config' , $data);
+
+             $data['value'] = $this->input->post('blog_meta_description');
+             $this->db->where('title' , 'blog_meta_description');
+             $this->db->update('config' , $data);
+
+             $data['value'] = $this->input->post('blog_keyword');
+             $this->db->where('title' , 'blog_keyword');
+             $this->db->update('config' , $data);
+
+
+             $this->session->set_flashdata('success', 'Setting update successed.');           
+             redirect(base_url() . 'admin/general_setting/', 'refresh');
+        }
+            $data['page_name']      = 'general_setting';
+            $data['page_title']     = 'General Setting';
+            $this->load->view('admin/index', $data);
+    }
+
+    // general setting
+    function email_setting($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '17');
+            /* end menu active/inactive section*/
+
+        if ($param1 == 'update') {
+            $protocol = $this->input->post('protocol');            
+            if($protocol=='smtp')
+            {
+                $data['value'] = $this->input->post('protocol');
+                $this->db->where('title' , 'protocol');
+                $this->db->update('config' , $data);
+
+                $data['value'] = $this->input->post('smtp_host');
+                $this->db->where('title' , 'smtp_host');
+                $this->db->update('config' , $data);
+
+                $data['value'] = $this->input->post('smtp_user');
+                $this->db->where('title' , 'smtp_user');
+                $this->db->update('config' , $data);
+
+
+                $data['value'] = $this->input->post('smtp_pass');
+                $this->db->where('title' , 'smtp_pass');
+                $this->db->update('config' , $data);
+
+                $data['value'] = $this->input->post('smtp_port');
+                $this->db->where('title' , 'smtp_port');
+                $this->db->update('config' , $data);
+
+                $data['value'] = $this->input->post('smtp_crypto');
+                $this->db->where('title' , 'smtp_crypto');
+                $this->db->update('config' , $data); 
+            }
+            else if($protocol=='sendmail')
+            {
+                $data['value'] = $this->input->post('protocol');
+                $this->db->where('title' , 'protocol');
+                $this->db->update('config' , $data);
+
+                $data['value'] = $this->input->post('mailpath');
+                $this->db->where('title' , 'mailpath');
+                $this->db->update('config' , $data);
+            }
+
+             $data['value'] = $this->input->post('contact_email');
+             $this->db->where('title' , 'contact_email');
+             $this->db->update('config' , $data);
+
+             $this->session->set_flashdata('success', 'Setting update successed.');           
+             redirect(base_url() . 'admin/email_setting/', 'refresh');
+        }
+            $data['page_name']      = 'email_setting';
+            $data['page_title']     = 'Email Setting';
+            $this->load->view('admin/index', $data);
+    }
+
+
+    // logo setting
+    function logo_setting($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '18');
+            /* end menu active/inactive section*/
+
+        if ($param1 == 'update') {
+            move_uploaded_file($_FILES['website_logo']['tmp_name'], 'uploads/system_logo/logo.png');            
+            move_uploaded_file($_FILES['website_favicon']['tmp_name'], 'uploads/system_logo/favicon.ico');
+
+            $this->session->set_flashdata('success', 'Logo update successed');
+
+            redirect(base_url() . 'admin/logo_setting/', 'refresh');
+        }
+
+            $data['page_name']      = 'logo_setting';
+            $data['page_title']     = 'Logo Setting';
+            $this->load->view('admin/index', $data);
+    }
+
+    //footer setting
+    function footer_setting($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '19');
+            /* end menu active/inactive section*/
+
+        if ($param1 == 'update') {
+            $data['value'] = $this->input->post('footer1_title');
+            $this->db->where('title' , 'footer1_title');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('footer1_content');
+            $this->db->where('title' , 'footer1_content');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('footer2_title');
+            $this->db->where('title' , 'footer2_title');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('footer2_content');
+            $this->db->where('title' , 'footer2_content');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('footer3_title');
+            $this->db->where('title' , 'footer3_title');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('footer3_content');
+            $this->db->where('title' , 'footer3_content');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('copyright_text');
+            $this->db->where('title' , 'copyright_text');
+            $this->db->update('config' , $data);
+
+
+            $this->session->set_flashdata('success', 'Footer update successed');
+
+            redirect(base_url() . 'admin/footer_setting/', 'refresh');
+        }
+
+            $data['page_name']      = 'footer_setting';
+            $data['page_title']     = 'Footer Content Management';
+            $this->load->view('admin/index', $data);
+    }
+    //seo setting
+    function seo_setting($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '20');
+            /* end menu active/inactive section*/
+
+        if ($param1 == 'update') {
+            $data['value'] = $this->input->post('author');
+            $this->db->where('title' , 'author');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('home_page_seo_title');
+            $this->db->where('title' , 'home_page_seo_title');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('focus_keyword');
+            $this->db->where('title' , 'focus_keyword');
+            $this->db->update('config' , $data);
+
+
+            $data['value'] = $this->input->post('meta_description');
+            $this->db->where('title' , 'meta_description');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('google_analytics_id');
+            $this->db->where('title' , 'google_analytics_id');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('social_share_enable');
+            $this->db->where('title' , 'social_share_enable');
+            $this->db->update('config' , $data);            
+
+            $data['value'] = $this->input->post('facebook_url');
+            $this->db->where('title' , 'facebook_url');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('twitter_url');
+            $this->db->where('title' , 'twitter_url');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('linkedin_url');
+            $this->db->where('title' , 'linkedin_url');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('vimeo_url');
+            $this->db->where('title' , 'vimeo_url');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('youtube_url');
+            $this->db->where('title' , 'youtube_url');
+            $this->db->update('config' , $data);
+
+            
+
+
+
+
+            $this->session->set_flashdata('success', 'SEO & social setting update successed');
+
+            redirect(base_url() . 'admin/seo_setting/', 'refresh');
+        }
+
+            $data['page_name']      = 'seo_setting';
+            $data['page_title']     = 'SEO Configuration Management';
+            $this->load->view('admin/index', $data);
+    }
+
+
+    //seo setting
+    function social_login_setting($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '22');
+            /* end menu active/inactive section*/
+
+        if ($param1 == 'update_facebook') {
+            $facebook_login_enable = $this->input->post('facebook_login_enable');
+            if($facebook_login_enable ==''){
+                $data['value'] = '0';
+            }else{
+               $data['value'] = $facebook_login_enable;
+            }
+            $this->db->where('title' , 'facebook_login_enable');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('facebook_app_id');
+            $this->db->where('title' , 'facebook_app_id');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('facebook_app_secret');
+            $this->db->where('title' , 'facebook_app_secret');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('facebook_graph_version');
+            $this->db->where('title' , 'facebook_graph_version');
+            $this->db->update('config' , $data);
+
+            $this->session->set_flashdata('success', 'Facebook login setting update successed');
+            redirect(base_url() . 'admin/social_login_setting/', 'refresh');
+        }
+        if ($param1 == 'update_google') {
+            $google_login_enable = $this->input->post('google_login_enable');
+            if($google_login_enable ==''){
+                $data['value'] = '0';
+            }else{
+               $data['value'] = $google_login_enable;
+            }
+            $this->db->where('title' , 'google_login_enable');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('google_application_name');
+            $this->db->where('title' , 'google_application_name');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('google_client_id');
+            $this->db->where('title' , 'google_client_id');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('google_client_secret');
+            $this->db->where('title' , 'google_client_secret');
+            $this->db->update('config' , $data);
+
+            $data['value'] = $this->input->post('google_redirect_uri');
+            $this->db->where('title' , 'google_redirect_uri');
+            $this->db->update('config' , $data);
+
+            $this->session->set_flashdata('success', 'Google login setting update successed');
+            redirect(base_url() . 'admin/social_login_setting/', 'refresh');
+        }
+
+            $data['page_name']      = 'social_login_setting';
+            $data['page_title']     = 'Facebook & Google Login Setting';
+            $this->load->view('admin/index', $data);
+    }
+
+    //ads setting
+    function ad_setting($param1 = '', $param2 = ''){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '21');
+            /* end menu active/inactive section*/
+
+        if ($param1 == 'update') {
+            $ad_250x300_type = $this->input->post('ad_250x300_type');
+            $ad_160x600_type = $this->input->post('ad_160x600_type');
+            if($ad_250x300_type !=0){
+                if ($ad_250x300_type==1) {
+                    $data['value']         = base_url().'uploads/no_image.jpg';
+                    if(isset($_FILES['ad_250x300_image']) && $_FILES['ad_250x300_image']['name']!=''){
+                        move_uploaded_file($_FILES['ad_250x300_image']['tmp_name'], 'uploads/ads/ad_250x300.jpg');
+                        $data['value']     = base_url().'uploads/ads/ad_250x300.jpg';
+                        $this->db->where('title' , 'ad_250x300_image_url');
+                        $this->db->update('config' , $data);
+                    }
+                    if($this->input->post('ad_250x300_image_url')!=''){                
+                        $data['value']  = $this->input->post('ad_250x300_image_url');
+                        $this->db->where('title' , 'ad_250x300_image_url');
+                        $this->db->update('config' , $data);
+                    }
+
+                    if($this->input->post('ad_250x300_url')!=''){                
+                        $data['value']  = $this->input->post('ad_250x300_url');
+                        $this->db->where('title' , 'ad_250x300_url');
+                        $this->db->update('config' , $data);
+                    }  
+
+
+                    $data['value'] = $this->input->post('ad_250x300_type');
+                    $this->db->where('title' , 'ad_250x300_type');
+                    $this->db->update('config' , $data);
+                }else if ($ad_250x300_type==2) {
+                    $data['value'] = $this->input->post('ad_250x300_code');
+                    $this->db->where('title' , 'ad_250x300_code');
+                    $this->db->update('config' , $data);
+
+                    $data['value'] = $this->input->post('ad_250x300_type');
+                    $this->db->where('title' , 'ad_250x300_type');
+                    $this->db->update('config' , $data);
+
+                }else{
+                    $data['value'] = $this->input->post('ad_250x300_code');
+                    $this->db->where('title' , 'ad_250x300_code');
+                    $this->db->update('config' , $data);
+
+                }
+
+            }else{
+                $data['value'] = '0';
+                $this->db->where('title' , 'ad_250x300_type');
+                $this->db->update('config' , $data);
+            }            
+            if($ad_160x600_type !=0){
+                if ($ad_160x600_type==1) {
+                    $data['value']         = base_url().'uploads/no_image.jpg';
+                    if(isset($_FILES['ad_160x600_image']) && $_FILES['ad_160x600_image']['name']!=''){
+                        move_uploaded_file($_FILES['ad_160x600_image']['tmp_name'], 'uploads/ads/ad_160x600.jpg');
+                        $data['value']     = base_url().'uploads/ads/ad_160x600.jpg';
+                        $this->db->where('title' , 'ad_160x600_image_url');
+                        $this->db->update('config' , $data);
+                    }
+                    if($this->input->post('ad_160x600_image_url')!=''){                
+                        $data['value']  = $this->input->post('ad_160x600_image_url');
+                        $this->db->where('title' , 'ad_160x600_image_url');
+                        $this->db->update('config' , $data);
+                    }
+
+                    if($this->input->post('ad_160x600_url')!=''){                
+                        $data['value']  = $this->input->post('ad_160x600_url');
+                        $this->db->where('title' , 'ad_160x600_url');
+                        $this->db->update('config' , $data);
+                    }  
+
+
+                    $data['value'] = $this->input->post('ad_160x600_type');
+                    $this->db->where('title' , 'ad_160x600_type');
+                    $this->db->update('config' , $data);
+                }else if ($ad_160x600_type==2) {
+                    $data['value'] = $this->input->post('ad_160x600_code');
+                    $this->db->where('title' , 'ad_160x600_code');
+                    $this->db->update('config' , $data);
+
+                    $data['value'] = $this->input->post('ad_160x600_type');
+                    $this->db->where('title' , 'ad_160x600_type');
+                    $this->db->update('config' , $data);
+
+                }
+				else{
+                    $data['value'] = $this->input->post('ad_160x600_code');
+                    $this->db->where('title' , 'ad_160x600_code');
+                    $this->db->update('config' , $data);
+
+                }
+
+            }
+				else{
+					$data['value'] = '0';
+					$this->db->where('title' , 'ad_160x600_type');
+					$this->db->update('config' , $data);
+				}
+			$this->session->set_flashdata('success', 'Ads setting update successed');
+
+            redirect(base_url() . 'admin/ad_setting/', 'refresh');
+        }
+
+            $data['page_name']      = 'ad_setting';
+            $data['page_title']     = 'Ads Configuration';
+            $this->load->view('admin/index', $data);
+	}
+
+    function test_mail(){
+        $email  =    $this->input->post('email');
+        if($email !=''){
+            $this->load->model('email_model');
+            if($this->email_model->test_mail($email)){
+                $this->session->set_flashdata('success', 'Mail Configuration is perfect');
+                $this->session->set_flashdata('send_success', 'Mail Configuration is perfect.Please check your mail to confirm');
+                redirect(base_url() . 'admin/email_setting/', 'refresh');
+            }else{
+                $this->session->set_flashdata('send_error', 'Mail Configuration is perfect');
+                redirect(base_url() . 'admin/email_setting/', 'refresh');
+            }
+            
+        }
+        
+        $this->session->set_flashdata('error', 'Please enter a valid email.');
+        redirect(base_url() . 'admin/email_setting/', 'refresh');
+        
+    }
+
+	// database backup and restore management
+    function backup_restore($operation = '', $type = ''){
+
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '22');
+            /* end menu active/inactive section*/   
+        
+        if ($operation == 'create') {            
+            $this->common_model->create_backup();
+            $this->session->set_flashdata('success', 'Backup created..');
+            redirect(base_url() . 'admin/backup_restore/', 'refresh');
+        }
+        if ($operation == 'download') {
+            $this->load->helper('download');
+            force_download('db_backup/'.$type, TRUE);
+        }
+        if ($operation == 'delete') {
+            $this->load->helper('file');
+            $path_to_file = 'db_backup/'.$type;
+            if(unlink($path_to_file)) {
+                $this->session->set_flashdata('success', 'Deleted');
+                redirect(base_url() . 'admin/backup_restore/', 'refresh');
+            }
+            else {
+                $this->session->set_flashdata('error', 'File not found..');
+                redirect(base_url() . 'admin/backup_restore/', 'refresh');
+            }
+        }
+        if ($operation == 'restore') {
+            $this->common_model->restore_backup();
+            $this->session->set_flashdata('backup_message', 'Backup Restored');
+            redirect(base_url() . 'admin/backup_restore/', 'refresh');
+        }
+        
+            $data['page_info']  = 'Create backup / restore from backup';
+            $data['page_name']  = 'backup_restore';
+            $data['page_title'] = 'Manage Backup and Restore';
+            $this->load->view('admin/index', $data);
+    }
+
+    function view_modal($page_name = '' , $param2 = '' , $param3 = ''){
+            $account_type       =   $this->session->userdata('login_type');
+            $data['param2']     =   $param2;
+            $data['param3']     =   $param3;
+            $this->load->view('admin/'.$page_name.'.php' ,$data);        
+        
+    }
+
+    //profile
+	function manage_profile(){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '12');
+            /* end menu active/inactive section*/
+            $data['page_name']      = 'manage_profile';
+            $data['page_title']     = 'Update profile information';
+            $data['profile_info']   = $this->db->get_where('user', array(
+            'user_id' => $this->session->userdata('user_id')))->result_array();
+            $this->load->view('admin/index', $data);
+    }
+
+    // profile
+    function profile($param1 = '', $param2 = '', $param3 = ''){
+        /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '12');
+            /* end menu active/inactive section*/
+            $user_id=$this->session->userdata('user_id');
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url() . 'login', 'refresh');
+        if ($param1 == 'update') {
+            $data['name']  = $this->input->post('name');
+            $data['email'] = $this->input->post('email');
+            
+            $this->db->where('user_id', $user_id);
+            $this->db->update('user', $data);
+            $this->common_model->clear_cache();
+            move_uploaded_file($_FILES['photo']['tmp_name'], 'uploads/user_image/' .$user_id.'.jpg');
+            $this->common_model->clear_cache();
+            $this->session->set_flashdata('success', 'Profile information updated.');
+            redirect(base_url() . 'admin/manage_profile/', 'refresh');
+        }
+        if ($param1 == 'change_password'){
+            $password               = md5($this->input->post('password'));
+            $new_password           = md5($this->input->post('new_password'));
+            $retype_new_password    = md5($this->input->post('retype_new_password'));
+            
+            $current_password       = $this->db->get_where('user', array(
+                'user_id' => $this->session->userdata('user_id')
+            ))->row()->password;
+            
+            if ($current_password == $password && $new_password == $retype_new_password) {
+                $this->db->where('user_id', $this->session->userdata('user_id'));
+                $this->db->update('user', array(
+                    'password' => $new_password
+                ));
+                $this->session->set_flashdata('success', 'Password changed.');
+            }
+            elseif ($current_password !=$password ){
+                $this->session->set_flashdata('error', 'Old password not correct.');
+
+            } else {
+                $this->session->set_flashdata('error', 'Password not match.');
+            }
+            redirect(base_url() . 'admin/manage_profile/', 'refresh');
+        }
+    }
+    //theme
+    function manage_theme(){
+        if ($this->session->userdata('admin_is_login') != 1)
+            redirect(base_url(), 'refresh');
+            /* start menu active/inactive section*/
+            $this->session->unset_userdata('active_menu');
+            $this->session->set_userdata('active_menu', '12');
+            /* end menu active/inactive section*/
+            $data['page_name']  = 'manage_theme';
+            $data['page_title'] = 'Manage theme color';
+            $this->load->view('admin/index', $data);
+    }
+
+    //universal delete function
+    function delete_record(){
+            $response           = array();
+            $row_id             = $this->input->post('row_id');
+            $table_name         = $this->input->post('table_name');
+            $table_row_id       =$table_name.'_id';
+            $this->db->where($table_row_id , $row_id);
+            $query=$this->db->delete($table_name);
+            if($query==true){
+            $response['status']  = 'success';
+            $response['message'] = tr_wd('Deleted successfully !');
+            }
+            else{
+            $response['status']  = 'error';
+            $response['message'] = 'Unable to delete record ...';
+            }        
+            echo json_encode($response);
+        
+    }
+
+    //imdb import
+    function import_movie(){
+        $response                   = array();        
+        $id                         =   trim($_POST["id"]);
+        $from                       =   $_POST["from"];
+        //$id = 1402;
+        //$from ='tv';
+        $response['submitted_data'] = $_POST;
+        $this->load->model('tmdb_model');
+        if($from=='tv'){
+            $data = $this->tmdb_model->get_tvseries_info($id);
+        }else{
+            $data = $this->tmdb_model->get_movie_info($id);
+        }
+        //var_dump($data);      
+        if(isset($data['status']) && $data['status']=='success'){
+            $response['imdb_status']    = 'success';
+            $response['imdbid']         = $data['imdbid'];
+            $response['title']          = $data['title'];
+            $response['plot']           = $data['plot'];
+            $response['runtime']        = $data['runtime'];
+            $response['actor']          = $this->common_model->get_star_ids('actor',$data['actor']);
+            $response['director']       = $this->common_model->get_star_ids('director',$data['director']);
+            $response['writer']         = $this->common_model->get_star_ids('writer',$data['writer']);
+            $response['country']        = $this->common_model->get_country_ids($data['country']);
+            $response['genre']          = $this->common_model->get_genre_ids($data['genre']);
+            $response['rating']         = $data['rating'];
+            $response['release']        = $data['release'];
+            $response['poster']         = $data['poster'];
+            $response['response']       = 'yes';
+        }
+        else{
+            $response['imdb_status']    = 'fail';
+            $response['title']          = '';
+            $response['plot']           = '';
+            $response['runtime']        = '';
+            $response['actor']          = '';
+            $response['director']       = '';
+            $response['writer']         = '';
+            $response['country']        = '';
+            $response['genre']          = '';
+            $response['rating']         = '';
+            $response['release']        = '';
+            $response['poster']         = '';
+            $response['response']       = 'no';
+        }
+        echo json_encode($response);
+    }
+
+    function fetch_actor_from_tmdb(){
+        $response                   = array();        
+        $id                         =   trim($_POST["id"]);
+        $from                       =   $_POST["from"];
+        //$id = 284053;
+        //$from ='tvww';
+        $response['submitted_data'] = $_POST;
+        $this->load->model('tmdb_model');
+        if($from=='tv'){
+            $data = $this->tmdb_model->get_tvshow_actor_info($id);
+        }else{
+            $data = $this->tmdb_model->get_movie_actor_info($id);
+        }
+        $this->session->set_flashdata('success', $data.' Stars imported from TMDB..');
+        redirect(base_url() . 'admin/manage_star/', 'refresh');
+        //var_dump($data);
+    }
+
+    function download_link(){
+        $response = array();
+        $data['videos_id']          = $_POST["videos_id"];            
+        $data['link_title']         = $_POST["link_title"];
+        $data['download_url']       = $_POST["download_url"];
+        $this->db->insert('download_link', $data);
+        $response['row_id']  = $this->db->insert_id();
+        $response['post_status']                = "success";
+        $response['link_title']         = $_POST["link_title"];
+        $response['download_url']       = $_POST["download_url"];         
+        echo json_encode($response);    
+    }
+    function video_file(){
+        $response = array();
+        $file_data['videos_id']         = $_POST["videos_id"];            
+        $file_data['file_source']       = $_POST["type"];
+        $file_data['file_url']          = $_POST["url"];
+        
+        $file_data['source_type']       = 'link';
+        $this->db->insert('video_file', $file_data);
+        $response['row_id']             = $this->db->insert_id();
+        $response['post_status']        = "success";
+        $response['type']               = $_POST["type"];
+        $response['url']                = $_POST["url"];         
+        echo json_encode($response);    
+    }
+
+    function episodes_url(){
+        $response = array();
+        $file_data['videos_id']         = $_POST["videos_id"];
+        $file_data['seasons_id']        = $_POST["seasons_id"];
+        $file_data['episodes_name']        = $_POST["episodes_name"];            
+        $file_data['file_source']       = $_POST["type"];
+        $file_data['file_url']          = $_POST["url"];
+        $file_data['HD']          = $_POST["hd"];
+        $file_data['cze_lang']          = $_POST["cze_lang"];
+        $file_data['cze_sub']          = $_POST["cze_sub"];
+        $file_data['source_type']       = 'link';
+        $this->db->insert('episodes', $file_data);
+        $response['row_id']             = $this->db->insert_id();
+        $response['post_status']        = "success";
+        $response['type']               = $_POST["type"];
+        $response['url']                = $_POST["url"];         
+        $response['episodes_name']      = $_POST["episodes_name"];         
+        echo json_encode($response);    
+    }
+
+    // rating
+    function rating(){
+        $response = array();            
+        $rate                       = $_POST["rate"];
+        $video_id                       = $_POST["video_id"];
+        $post_status = $this->post_rating( $rate , $video_id);
+        $response['post_status'] = $post_status; 
+        $response['rate'] = $rate; 
+        $response['video_id'] = $video_id; 
+        echo json_encode($response);
+    
+    }
+
+    // post rating
+    function post_rating( $rate , $video_id){
+
+        $ip=$_SERVER['REMOTE_ADDR'];
+
+        $verify_data = array(
+                            'video_id'    => $video_id,                             
+                            'ip'      => $ip                                                    
+                            );
+
+        $data = array(
+                      'video_id'    => $video_id,
+                      'rating'    => $rate,                             
+                       'ip'      => $ip                                                   
+                    );
+
+        $query = $this->db->get_where('rating' , $verify_data);        
+            $rating = $query->result_array();
+            $num_row = $query->num_rows();
+            if($num_row>0){        
+                $this->db->where($verify_data);
+				$this->db->update('rating', $data);
+			}
+            else{                
+                $this->db->insert('rating', $data);
+                $current_rating =$this->db->get_where('videos' , array('videos_id'=>$video_id))->row()->total_rating;
+				$rating=$current_rating+1;
+				$this->db->where('videos_id', $video_id);
+				$this->db->update('videos', array('total_rating' => $rating));                
+            }
+           return "success"; 
+        }
+
+        //movie scraper
+
+        function movie_scrapper_manage(){
+			if ($this->session->userdata('admin_is_login') != 1)
+				// redirect(base_url(), 'refresh');                         // MOVIE SCRAPER PERMISSION TO ALL (PUBLIC PERMISSION)
+				/* start menu active/inactive section*/
+				$this->session->unset_userdata('active_menu');
+				$this->session->set_userdata('active_menu', '7');
+				/* end menu active/inactive section*/
+				$data['page_name']  = 'movie_scrapper';
+				$data['page_title'] = 'Movie Scrapper';
+				$this->load->view('admin/index', $data);
+		}
+        //movie scraper management
+		
+		public function movie_scrapper() {
+			$message            =   '';
+            $list               =   "11 22 63 - 11 22 63 - 745,12 opic - 12 Monkeys - 448,13 Reasons Why - 13 Reasons Why - 1081,16 a těhotná - 16 and Pregnant - 142,1864 - 1864 - 464,1890 - 1890 - 1221,19-2: Policie Montréal - 19-2 - 1381,1983 - 1983 - 1482,2 Socky - 2 Broke Girls - 77,24 hodin - 24 - 116,24: Legacy - 24: Legacy - 1047,3% - 3 percent - 1009,3-2-1 Tučňáci! - 3-2-1 Penguins! - 525,30 případů majora Zemana - 30 prípadu majora Zemana - 392,4 Blocks - 4 Blocks - 1593,4400 - The 4400 - 459,4teens - 4teens - 625,5 dnů do půlnoci - 5ive Days to Midnight - 1051,54 hodin - Gladbeck - 1588,666 Park Avenue - 666 Park Avenue - 840,7 Deadly Sins - 7 Deadly Sins - 728,9-1-1 - 9-1-1 - 1225,90210: Nová generace - 90210 - 20,A Series of Unfortunate Events - A Series of Unfortunate Events - 1030,A Very English Scandal - A Very English Scandal - 1379,A.P. Bio - A.P. Bio - 1283,A.P.B. - A.P.B. - 1049,About a Boy - About a Boy - 314,After Life - After Life - 1565,Aftermath - Aftermath - 949,Agent Carter - Agent Carter - 440,Agent X - Agent X - 618,Agenti S.H.I.E.L.D. - Agents of S.H.I.E.L.D. - 233,Agents of S.H.I.E.L.D.: Slingshot - Agents of S.H.I.E.L.D.: Slingshot - 1093,Agentura Jasno - Psych - 303,Agresivní virus - The Strain - 365,Akce nový domov - Akce nový domov - 1012,Akta X - The X Files - 119,Alcatraz - Alcatraz - 78,Alex a spol. - Alex & Co. - 1005,Alex, Inc. - Alex, Inc. - 1295,Alexa & Katie - Alexa & Katie - 1311,Alf - ALF - 120,Alias - Alias - 76,Alias Grace - Alias Grace - 1194,All American - All American - 1443,All or Nothing: Manchester City - All or Nothing: Manchester City - 1399,Allegiance - Allegiance - 496,Ally McBealová - Ally McBeal - 209,Alone Together - Alone Together - 1230,Altered Carbon - Altered Carbon - 1239,Amazonie - Journey Into Amazonia - 1323,Amazonka - Amazon - 26,American Crime - American Crime - 479,American Crime Story - American Crime Story - 737,American Gods - American Gods - 1099,American Gothic - American Gothic - 866,American Horror Story - American Horror Story - 202,American Housewife - American Housewife - 1014,American Vandal - American Vandal - 1173,American Woman - American Woman - 1368,Americká odysea - American Odyssey - 549,Americký táta - American Dad! - 236,Amerika hledá topmodelku - America's Next Top Model - 1310,Amyino plodné lůno - Inside Amy Schumer - 1106,Anatomie lži - Lie to Me - 502,Anča a Pepík - Anča a Pepík - 1067,Andělé v Americe - Angels in America - 721,Andílci - Angel's Friends - 828,Andromeda - Andromeda - 687,Angel from Hell - Angel from Hell - 714,Anger Management - Anger Management - 163,Angie Tribeca - Angie Tribeca - 723,Animal Kingdom - Animal Kingdom - 883,Ano, šéfe! - Ano, séfe! - 285,Ano, šéfová! - Ano, šéfová! - 1468,Anzac Girls - Anzac Girls - 898,Apple Tree Yard - Apple Tree Yard - 1052,Aquarius - Aquarius - 509,Arabela - Arabela - 731,Archer - Archer - 32,Arrested Development - Arrested Development - 1348,Arrow - Arrow - 256,Ash vs Evil Dead - Ash vs Evil Dead - 609,Atentát - Atentat - 586,Atlanta - Atlanta - 977,Atlantis - Atlantis - 228,Atypical - Atypical - 1197,Au service de la France - Au service de la France - 1429,Avengers - Sjednocení - Marvel's Avengers Assemble - 278,Až po uši - Az po usi - 424,Až tam nezbyl žádný - And Then There Were None - 686,Babylon 5 - Babylon 5 - 1013,Babylon Berlin - Babylon Berlin - 1177,Back in the Game - Back in the Game - 242,Backpackers - Backpackers - 367,Bad Judge - Bad Judge - 407,Báječná léta - The Wonder Years - 595,Banana - Banana - 529,Bancroft - Bancroft - 1241,Banshee - Banshee - 298,Baptiste - Baptiste - 1556,Barry - Barry - 1285,Barva moci - Shots Fired - 1458,Batesův motel - Bates Motel - 173,Batman - Batman: The Animated Series - 734,Batman budoucnosti - Batman Beyond - 791,Battlestar Galactica - Battlestar Galactica - 390,Bedna - Cracker - 1276,Bedrag - Follow the money - 1029,Belfer - Belfer - 1109,Believe - Believe - 317,Bella a Sebastián - Belle and Sebastian - 741,Benched - Benched - 421,Beowulf: Návrat do Shieldlandu - Beowulf: Return to the Shieldlands - 688,Berlínská mise - Berlin Station - 950,Berlínští vlci - Die Wölfe - 1496,Betrayal - Betrayal - 270,Better Things - Better Things - 954,Between - Between - 518,Beware the Batman - Beware the Batman - 214,Beyond - Beyond - 1019,Bez hranic - Crossing Lines - 184,Beze stopy - Without a Trace - 23,Bezohlední - Reckless - 363,Bible - The Bible - 501,Big Mouth - Big Mouth - 1164,Bílá královna - The White Queen - 1160,Bílá princezna - The White Princess - 1094,Billions - Billions - 698,Bionická žena - Bionic Woman - 725,Bishvila Giborim Afim - When Heroes Fly - 1534,Bitten - Bitten - 311,Bitva o Gallipoli - Deadline Gallipoli - 895,Black Books - Black Books - 115,Black Lightning - Black Lightning - 1231,Black Sails - Black Sails - 304,Blood - Blood - 1576,Blood and Oil - Blood & Oil - 578,Blood Drive - Blood Drive - 1112,Bloodline - Bloodline - 487,Blunt Talk - Plané řeči - Blunt Talk - 555,Bodyguard - Bodyguard - 1424,Bohéma - Bohéma - 1034,Boj o moc - Succession - 1346,Boj o ředitelnu - Vice Principals - 887,Boj o těžkou vodu - Kampen om tungtvannet - 1148,Bolest, hnis a jed - Pain, Pus and Poison: The Search for Modern Medicines - 607,Borci z Blue Mountain State - Blue Mountain State - 79,Bordertown - Bordertown - 749,Borgia - Borgia - 799,Borgiové - The Borgias - 188,Born to Kill - Born to Kill - 1474,Bosch - Bosch - 792,Boss - Boss - 323,Bouřlivé léto v Britské Indii - Indian Summers - 782,BrainDead - BrainDead - 868,Bratrstvo neohrožených - Band of Brothers - 33,Brickleberry - Brickleberry - 240,Britannia - Britannia - 1232,Broad City - Broad City - 319,Broadchurch - Broadchurch - 443,Broken - Broken - 1142,Bronzová zahrada - El Jardín de Bronce - 1217,Brooklyn Nine-Nine - Brooklyn Nine-Nine - 219,Bubáci a hastrmani - Bubaci a hastrmani - 118,Buffy, přemožitelka upírů - Buffy the Vampire Slayer - 823,Bull - Bull - 937,Burden of Truth - Burden of Truth - 1268,By Any Means - By Any Means - 263,Byla jednou koťata - Byla jednou koťata - 1287,Bylo, nebylo - Once Upon a Time - 100,Callboys - Callboys - 1247,Camelot - Camelot - 930,Camp - Camp - 213,Cardinal - Cardinal - 1042,Carnivale - Carnivàle - 191,Čarodějky - Charmed - 121,Čáryfuk - Catweazle - 651,Čas čarodějnic - A Discovery of Witches - 1420,Čas zabíjet - Killing Time - 1300,Čas zločinu - Crime Time - 1548,Castle na zabití - Castle - 80,Castle Rock - Castle Rock - 1378,Castlevania - Castlevania - 1125,Casual - Casual - 590,Catastrophe - Catastrophe - 613,Černá listina - The Blacklist - 238,Černá zmije - The Black Adder - 82,Černá zmije II - Black-Adder II - 83,Černá zmije III - Black Adder the Third - 84,Černá zmije IV - Blackadder Goes Forth - 85,Černé jezero - Svartsjön - 1408,Černé pondělí - Black Monday - 1517,Černé vdovy - Černé vdovy - 1549,Černé zrcadlo - Národní hymna - Black Mirror - 34,Červený trpaslík - Red Dwarf - 137,Česko Slovenská SuperStar - Česko Slovenská SuperStar - 1253,Česko Slovensko má talent - Česko Slovensko má talent - 1421,Cesta do hlubin mozku - The Brain With Dr. David Eagleman - 1509,Cestovatel - Journeyman - 877,Cesty Páně - Herrens veje - 1502,Četníci z Luhačovic - Četníci z Luhačovic - 1022,Četnické humoresky - Cetnické humoresky - 776,Chalupáři - The Cottagers - 271,Chance - Chance - 982,Channel Zero - Channel Zero - 968,Chaos - Chaos - 1129,Charlieho andílci - Charlie's Angels - 275,Charmed 2018 - Charmed 2018 - 1453,Chasing Life - Chasing Life - 350,Chasing Shadows - Chasing Shadows - 552,Chcete být milionářem? - Chcete být milionářem? - 784,Chesapeake Shores - Chesapeake Shores - 925,Chicago Fire - Chicago Fire - 223,Chicago Justice - Chicago Justice - 1062,Chicago Med - Chicago Med - 646,Chicago P.D. - Chicago PD - 297,Childhood's End - Childhood's End - 690,Chilling Adventures of Sabrina - Chilling Adventures of Sabrina - 1544,Chirurgové - Grey's Anatomy - 13,Chlupatá rota - Pet Squad - 884,Chuck - Chuck - 527,Chuggington - Veselé vláčky - Chuggington - 886,Chůva k pohledání - The Nanny - 306,Cirkus Bukowsky - Cirkus Bukowsky - 707,Cirkus Humberto - Cirkus Humberto - 1367,Císař Augustus - Empire - 1053,Cizinka - Outlander - 372,Class - Class - 975,Clipped - Clipped - 519,Cloak & Dagger - Cloak & Dagger - 1350,Clona - The Lens - 890,Closer - The Closer - 604,Closer: Nové případy - Major Crimes - 362,Co nového Scooby-Doo? - What's New, Scooby-Doo? - 903,Cobra Kai - Cobra Kai - 1339,Code Black - Code Black - 849,Code of a Killer - Code of a Killer - 660,Collateral - Collateral - 1291,Colony - Colony - 691,Columbo - Columbo - 594,Comeback - Comeback - 74,Condor - Condor - 1353,Confess - Confess - 1393,Constantine - Constantine - 419,Constantine 2018 - Constantine 2018 - 1277,Containment - Containment - 821,Continuum - Continuum - 177,Conversations with a Killer: The Ted Bundy Tapes - Conversations with a Killer: The Ted Bundy Tapes - 1566,Conviction - Conviction - 978,Counterpart - Counterpart - 1206,Crashing - Crashing - 760,Crashing US - Crashing US - 1056,Crawford - Crawford - 1242,Crazy Ex-Girlfriend - Crazy Ex-Girlfriend - 780,Crazyhead - Crazyhead - 972,Criminal Minds: Beyond Borders - Criminal Minds: Beyond Borders - 778,Crisis in Six Scenes - Crisis in Six Scenes - 958,Cristela - Cristela - 415,Crossbones - Crossbones - 352,Crowded - Crowded - 779,Čtyři a půl kamaráda - Four and a Half Friends - 830,Cucumber - Cucumber - 520,Dabing Street - Dabing Street - 1216,Dads - Dads - 216,Daleká cesta za domovem - Watership Down - 620,Dáma a Král - Dáma a Král - 1176,Damnation - Damnation - 1191,Dámský podnik - O Negócio - 833,Dámy, nedámy - Work It - 1417,Darebák - Rogue - 746,Daredevil - Daredevil - 495,Daria - Daria - 850,Dark - Dark - 1203,Dark Angel - Dark Angel - 1078,Dark Matter - Dark Matter - 516,Datel Woody - The New Woody Woodpecker Show - 769,Dating Around - Dating Around - 1545,Dávné světy - Ancient Worlds - 1510,Dead of Summer - Dead of Summer - 872,Deadly Class - Deadly Class - 1490,Deadwood - Deadwood - 885,Deception - Deception - 1266,Deep State - Deep State - 1332,Defiance - Defiance - 174,Deník zasloužilé matky - Reba - 709,Derry Girls - Derry Girls - 1382,Designated Survivor - Designated Survivor - 938,Detectorists - Detectorists - 622,Deutschland 83 - Deutschland 83 - 921,Devious Maids - Devious Maids - 185,Dexter - Dexter - 21,Dimenze 404 - Dimension 404 - 1089,Dirk Gently's Holistic Detective Agency - Dirk Gently's Holistic Detective Agency - 1007,Disenchantment - Disenchantment - 1391,Dívčí spolek - Clique - 1091,Dívka odjinud - Lost Girl - 431,Dívky s posláním - LEGO Friends: Girls on a Mission - 1513,Divoké sny Maxipsa Fíka - Divoké sny Maxipsa Fíka - 192,Divoký anděl - Wild Angel - 703,Do neznáma - South of Nowhere - 152,Dobrá manželka - The Good Wife - 234,Dobrej policajt - Good Cop - 904,Doctor Thorne - Doctor Thorne - 856,Dogs of Berlin - Dogs of Berlin - 1573,Dokonalý podraz - Leverage - 35,Dokonalý svět - Dokonaly svet - 144,Doktor Martin - Doktor Martin - 591,Doktor Martin UK - Doc Martin UK - 1358,Doktoři - The Resident - 1400,Doktorka Kellerová - Doktorka Kellerová - 911,Doktorka Plyšáková - Doc McStuffins - 831,Doktorka z Dixie - Hart of Dixie - 253,Domek z karet - House of Cards - 530,Dominion - Dominion - 355,Doom Patrol - Doom Patrol - 1550,Doteky osudu - Touch - 548,Dovolená v Protektorátu - Dovolená v Protektorátu - 534,Dr. Dokonalý - Dr. Dokonalý - 916,Dr. House - House M.D. - 122,Dr. Ken - Dr. Ken - 580,Drákula - Dracula - 284,Drápy - Claws - 1392,Drazí sousedé - Drazí sousedé - 774,Druhá šance - Second Chance - 692,Drzá Jordan - Crossing Jordan - 537,Dva a půl chlapa - Two and a Half Men - 143,Dva z Queensu - The King of Queens - 1212,Dynastie Nováků - Dynastie Nováku - 793,Dynasties - Dynasties - 1485,Dynasty - Dynasty - 1170,Elfové - Elves: Unite the Magic - 805,Élite - Élite - 1454,Emerald City - Emerald City - 1023,Empire - Empire - 446,Endeavour - Endeavour - 328,Enlisted - Enlisted - 299,Epizody - Episodes - 309,Everwood - Everwood - 685,Everything Sucks! - Everything Sucks! - 1256,Evil Genius: The True Story of America's Most Diabolical Bank Heist - Evil Genius: The True Story of America's Most Diabolical Bank Heist - 1427,Exprezident Graves - Graves - 1107,Extant - Extant - 364,Extinct - Extinct - 1169,Eye Candy - Eye Candy - 444,Eyewitness - Eyewitness - 983,F.B.I. - F.B.I. - 1479,Falešný Hollywood - Big Time in Hollywood, FL - 834,Falling Skies - Falling Skies - 348,Falling Water - Falling Water - 969,Fam - Fam - 1540,Famílie - Parenthood - 151,Fargo - Fargo - 334,Farma SK - Farma SK - 291,Farscape - Farscape - 38,Fascinující proměny přírody - Nature's Most Amazing Events - 767,Fauda - Fauda - 1344,Fearless - Fearless - 1126,Feed the Beast - Feed the Beast - 857,Feud - Feud - 1072,Fifi z Květíkova - Fifi and the Flowertots - 787,Final Space - Final Space - 1307,Finding Carter - Finding Carter - 545,Firefly - Firefly - 36,Firma - The Firm - 111,Five Came Back - Five Came Back - 1483,Flaked - Flaked - 772,Flashpoint - Flashpoint - 86,Fleabag - Fleabag - 939,Fleming - Fleming - 308,Flintstoneovi - The Flintstones - 466,Folklore - Folklore - 1546,For the People - For the People - 1386,Forever - Forever - 394,Formula 1: Drive to Survive - Formula 1: Drive to Survive - 1568,Foylova válka - Foyle's War - 708,Frankie Drake Mysteries - Frankie Drake Mysteries - 1218,Franklin a Bash - Franklin & Bash - 383,Free Rein - Free Rein - 1370,Frequency - Frequency - 961,Friends from College - Friends from College - 1202,Friends with Better Lives - Friends with Better Lives - 332,Friends: Kámošky z Heartlake City - Friends of Heartlake City - 1514,Frikjent - Acquitted - 858,Frontier - Frontier - 1003,Fuller House - Fuller House 2016 - 758,Futurama - Futurama - 123,Future Man - Future Man - 1193,Game of Silence - Game of Silence - 812,Gang Related - Gang Related - 342,Garfieldova show - Garfield Show - 676,Geniální přítelkyně - My Brilliant Friend - 1478,Génius - Genius - 1095,Ghost Wars - Ghost Wars - 1171,Ghosted - Ghosted - 1158,Gigolové - Gigolos - 628,Gilmore Girls: A Year in the Life - Gilmore Girls: A Year in the Life - 1002,Gilmorova děvčata - Gilmore Girls - 87,Girlboss - Girlboss - 1096,Girls - Girls - 166,Glacé: The Frozen Dead - Glacé: The Frozen Dead - 1316,Glee - Glee - 25,GLOW - GLOW - 1117,God Friended Me - God Friended Me - 1469,Godless - Godless - 1200,Goldbergovi - The Goldbergs - 246,Goliath - Goliath - 995,Gomora - Gomorra - 425,Gone - Gone - 1471,Good Behavior - Good Behavior - 993,Good Girls - Good Girls - 1261,Good Girls Revolt - Good Girls Revolt - 1010,Good Trouble - Good Trouble - 1508,Good Witch - Good Witch - 880,Gotham - Gotham - 395,Grace and Frankie - Grace and Frankie - 511,Graceland - Graceland - 597,Gracepoint - Gracepoint - 408,Grandfathered - Grandfathered - 577,Grantchester - Grantchester - 770,Griffinovi - Family Guy - 88,Grimm - Grimm - 167,Grisse - Grisse - 1498,Growing Up Fisher - Growing Up Fisher - 321,Guerrilla - Guerrilla - 1092,Guilt - Guilt - 863,Gumballův úžasný svět - The Amazing World of Gumball - 1511,Gumídci - Adventures of the Gummi Bears - 89,Gunpowder - Gunpowder - 1178,Gympl s (r)učením omezeným - Gympl s (r)ucenim omezenym - 157,Gypsy - Gypsy - 1118,Hakan: Muhafiz - The Protector - 1577,Haló, tady Indie - Outsourced - 288,Halt and Catch Fire - PC Rebelové - Halt and Catch Fire - 344,Hand of God - Hand of God - 711,Hanna - Hanna - 1541,Hannibal - Hannibal - 171,Hap & Leonard - Hap and Leonard - 1035,Happy Together - Happy Together - 1551,Happy! - Happy! - 1205,Hard Sun - Hard Sun - 1254,Harley a Davidsonovi - Harley and the Davidsons - 963,Harlots - Harlots - 1101,Harrow - Harrow - 1301,Hasiči - Hasiči - 1563,Havaj 5-0 - Hawaii 5-0 - 230,Heartbeat - Heartbeat - 788,Heathers - Heathers - 1398,Helena - Helena - 159,Helix - Helix - 292,Hell on Wheels - Hell on Wheels - 90,Hemlock Grove - Hemlock Grove - 610,Hercule Poirot - Agatha Christie: Poirot - 587,Heuréka – město divů - Eureka - 91,Hidden - Craith - 1470,Hilda - Hilda - 1554,Hillary - Hillary - 1564,Hjørdis - Hjørdis - 987,Hlasatelka - Speakerine - 1507,Hledání - Looking - 300,Hold the Sunset - Hold the Sunset - 1389,Homecoming - Homecoming - 1464,Hooten & the Lady - Hooten and the Lady - 942,Horace and Pete - Horace and Pete - 813,Hospoda Jamajka - Jamaica Inn - 1226,Hostages - Hostages - 220,Hotel Adlon - Das Adlon. Eine Familiensaga - 584,Hotel Transylvánie: Seriál - Hotel Transylvania - 1246,Hra - The Game - 847,Hra o trůny - Game of Thrones - 124,Hráč - The Player - 569,Hráči - Ballers - 521,Hranice nemožného - Fringe - 58,Hrdinové - Heroes - 269,Hrdinové od Alama - Texas Rising - 514,Hrdinové: Znovuzrození - Heroes Reborn - 570,Hříšní lidé města pražského - The Sinful People of Prague - 888,Huangovi v Americe - Fresh Off the Boat - 1017,Hubert a Staller - Heiter bis tödlich - Hubert und Staller - 735,Huff - Huff - 145,Humans - Humans - 517,Hung - Na velikosti záleží - Hung - 1000,Hunters - Hunters - 807,Hunting Season - Hunting Season - 862,Hvězdná brána - Stargate SG-1 - 64,Hvězdná brána: Atlantida - Stargate: Atlantis - 16,Hvězdná brána: Hluboký vesmír - SGU Stargate Universe - 63,Hyde & Seek - Hyde & Seek - 1394,Hypnotizér - The Hypnotist - 1196,Il Nome della Rosa - The Name of the Rose - 1594,Imaginary Mary - Imaginary Mary - 1082,Impastor - Impastor - 656,Impérium - Mafie v Atlantic City - Boardwalk Empire - 125,Imposters - Imposters - 1075,Impulse - Impulse - 1349,In the Flesh - In the Flesh - 343,Incorporated - Incorporated - 998,Inhumans - Inhumans - 1161,Innocent 2018 - Innocent 2018 - 1342,Insatiable - Insatiable - 1439,Inspektor Banks - DCI Banks - 1150,Inspektor Max - Inspektor Max - 1248,Inteligence - Intelligence - 294,Into the Badlands - Into the Badlands - 630,Into the Dark - Into the Dark - 1441,Intruders - Intruders - 381,Invaze - Invasion - 146,Iron Fist - Iron Fist - 1073,Iron Man - Iron Man - 753,Ironside: Na straně zákona - Ironside - 257,Islámský stát - The State - 1477,It's Always Sunny in Philadelphia - It's Always Sunny in Philadelphia - 243,iZombie - iZombie - 485,Já jsem noc - I Am The Night - 1542,Já, Kajínek - Já, Kajínek - 1192,Já, Mattoni - Já, Mattoni - 923,Jak Bzuk a Ťuk putovali za sluníčkem - Jak Bzuk a Ťuk putovali za sluníčkem - 870,Jak funguje vesmír - How the Universe Works - 794,Jak jsem poznal vaši matku - How I Met Your Mother - 126,Jak nežít svůj život - How Not to Live Your Life - 918,Jak přežít rozvod - Girlfriend's Guide to Divorce - 1416,Jak prosté - Elementary - 227,Jak to dopadlo!? - Jak to dopadlo!? - 1324,Jak Ťuk a Bzuk nechtěli, aby pršelo - Jak Ťuk a Bzuk nechtěli, aby pršelo - 871,Jak vycvičit draky - Dragons: Riders of Berk - 229,Jamestown - Jamestown - 1119,Jane the Virgin - Jane the Virgin - 417,Janet Kingová - Janet King - 1045,Jarmark marnosti - Vanity Fair - 1406,Jean-Claude Van Johnson - Jean-Claude Van Johnson - 1222,Jedna noc - The Night Of - 869,Jekyll a Hyde - Jekyll and Hyde - 619,Jen další imigrant - Just Another Immigrant - 1436,Jen počkej, zajíci! - Nu, pogodi! - 305,Jennifer Falls - Jennifer Falls - 353,Jeremiah - Jeremiah - 147,Jessica Jones - Jessica Jones - 642,Jetelín - Jetelín - 896,Jistě, pane ministře - Yes Minister - 40,Jistě, pane premiére - Yes, Prime Minister - 59,Jmenuju se Earl - My Name Is Earl - 27,Joey - Joey - 455,John Adams - John Adams - 673,Jordskott - Jordskott - 729,Jsem do tebe blázen - Mad About You - 127,Jsi můj život - You Are the One - 743,K smrti trapný - I'm Dying Up Here - 1138,Kačer Dodgers - Duck Dodgers - 1418,Kačeří příběhy - DuckTales - 96,Kačeří příběhy 2017 - DuckTales 2017 - 1137,Kalifornské léto - Summerland - 148,Kameňák - Kameňák - 1557,Kanadská soda - lol:-) - 848,Kancl - The Office - 663,Kancl CZ - Kancl CZ - 457,Kapitán Exner - Kapitán Exner - 1143,Karppi - Deadwind - 1402,Kartel - El Cartel de los Sapos - 1383,Káťa a Škubánek - Káťa a Škubánek - 193,Kdo přežije - Survivor - 1064,Kempování - Camping - 1445,Kevin si počká - Kevin Can Wait - 1433,Killer Women - Killer Women - 295,Killing Eve - Killing Eve - 1302,Killjoys: Vesmírní lovci - Killjoys - 528,King a Maxwellová - King & Maxwell - 186,Kingdom - Kingdeom - 1538,Kingdom - Kingdom - 420,Kingová - King - 401,Kiss Me First - Kiss Me First - 1384,Klondike - Klondike - 1503,Knick: Doktoři bez hranic - The Knick - 377,Knight Rider - Knight Rider - 596,Knihovníci - The Librarians - 432,Kobra 11 - Alarm für Cobra 11 - Die Autobahnpolizei - 128,Kobra 11 - Nasazení týmu 2 - Alarm für Cobra 11 - Einsatz für Team 2 - 129,Komisař Maltese: Hon na mafii - Maltese - Il Romanzo del Commissario - 1559,Komisař Rex - Rex: A Cop's Best Friend - 602,Komplicové - Inside Men - 1347,Konec přehlídky - Parade's End - 488,Kořeny - Roots - 158,Kořeny 2016 - Roots 2016 - 851,Kosí bratři - Kosí bratři - 891,Kosmo - Kosmo - 979,Kouzelná Beruška a Černý kocour - Miraculous: Tales of Ladybug & Cat Noir - 1334,Kouzla přírody - How Nature Works - 905,Králova favoritka - Madre Paula - 1589,Královna Alžběta - Elizabeth I - 1312,Královská nemocnice - Kingdom Hospital - 1214,Královská nemocnice - Hospital Real - 1536,Království - Reign - 272,Kráska a zvíře - Beauty and the Beast - 252,Kravaťáci - Suits - 108,Krejzovi - Krejzovi - 1407,Kriger - Kriger - 1494,Kriminalista - Der Kriminalist - 899,Kriminálka Anděl - Kriminalka Andel - 41,Kriminálka Las Vegas - CSI: Crime Scene Investigation - 97,Kriminálka Miami - CSI: Miami - 42,Kriminálka New York - CSI: NY - 98,Kriminálka: Oddělení kybernetiky - CSI: Cyber - 481,Krize - The Brink - 522,Křižovatka smrti - Rush Hour - 797,Krkonošské pohádky - Krkonosské pohádky - 197,Krok za krokem - Step by Step - 461,Krtek - Little Mole - 178,Krypton - Krypton - 1271,Ku'damm 56 - Kudamm 56 - 1079,Kuků - Cuckoo - 371,Kurýr - Transporter: The Series - 536,La casa de papel - La casa de papel - 1269,La Catedral del Mar - Cathedral of the Sea - 1409,La Forêt - La Forêt - 1380,La Mante - La Mante - 1223,LA to Vegas - LA to Vegas - 1213,La trêve - La trêve - 1238,Laboratorní krysy - Lab Rats - 543,Labyrint - Labyrint - 585,Lajna - Lajna - 1114,Las Vegas: Kasino - Las Vegas - 608,Láska ve hvězdách - Star-Crossed - 313,Laskavý dotek - The Client List - 322,Lassie a kamarádi - The New Adventures of Lassie - 860,Legacies - Legacies - 1461,Legenda - Legends - 382,Legenda Korry - The Legend of Korra - 239,Legends of Tomorrow - Legends of Tomorrow - 724,Legion - Legion - 1050,LEGO City: Příběh celého města - LEGO City - 1426,Les Misérables - Les Misérables - 1533,Lethal Weapon - Lethal Weapon - 953,Letopisy rodu Shannara - The Shannara Chronicles - 705,Lidé zítřka - The Tomorrow People - 261,Life Sentence - Life Sentence - 1262,Lifeline - Lifeline - 1249,Liga špačků - D'Myna Leagues - 1281,Light as a Feather - Light as a Feather - 1446,Lightfields - Lightfields - 1530,Limitless - Limitless - 563,Little Women - Little Women - 1208,London Spy - London Spy - 624,Longmire - Longmire - 347,Looney Tunes: Úžasná show - The Looney Tunes Show - 809,Lore - Lore - 1179,Lost in Space - Lost in Space - 1308,Lovci duchů - Supernatural - 117,Lovci lebek - Breakout Kings - 1366,Lovci netvorů - Special Unit 2 - 716,Lovci zločinců - Person of Interest - 221,Love - Love - 763,Love, Nina - Love, Nina - 844,Lucifer - Lucifer - 546,Luck - Luck - 93,Lucky Louie - Lucky Louie - 22,Luke Cage - Luke Cage - 951,Luther - Luther - 203,Lví hlídka - The Lion Guard - 973,Lynč - Lynč - 1459,MacGyver - MacGyver - 131,MacGyver 2016 - MacGyver 2016 - 944,Mach a Šebestová - Mach a Šebestová - 194,Madam Secretary - Madam Secretary - 403,Mafiáni - Mafiáni - 783,Mafie vraždí jenom v létě - La mafia uccide solo d'estate - 1345,Magické hlubiny - Magické hlubiny - 1515,Magnum - Magnum, P.I. - 917,Magnum P.I. 2018 - Magnum P.I. 2018 - 1442,Making a Murderer - Making a Murderer - 710,Making History - Making History - 1065,Malá Velká Británie - Little Britain - 1257,Malá Velká Británie v USA - Little Britain USA - 1335,Malcolm v nesnázích - Malcolm in the Middle - 467,Malé lásky - Malé lásky - 1405,Máma - Mom - 225,Mammon - Mammon - 649,Mamon - Mamon - 599,Man Seeking Woman - Man Seeking Woman - 477,Man with a Plan - Man with a Plan - 1015,Manhattan - Manhattan - 373,Manhattan Love Story - Manhattan Love Story - 405,Manhunt - Manhunt - 1543,Maniac - Maniac - 1428,Manifest - Manifest - 1430,Manžel k pohledání - Happily Divorced - 615,Marcella - Marcella - 817,Marco Polo - Marco Polo - 666,Married - Married - 376,Mars - Mars - 999,Marseille - Marseille - 874,Marta a Věra - Marta a Vera - 922,Marvel Superhrdinové - LEGO Marvel Super Heroes: Maximum Overload - 430,Marvel’s Ant-Man - Marvel’s Ant-Man - 1110,Mary Kills People - Mary Kills People - 1040,Máša a medvěd - Masha and the Bear - 631,Master of None - Master of None - 679,Masters of Sex - Masters of Sex - 217,Masum - Innocent - 1297,Matrjoški - Matroesjka's - 1102,Max Steel - Max Steel - 785,Mayans M.C. - Mayans M.C. - 1410,McMafia - McMafia - 1237,Mé nové Já - Enlightened - 1058,Me, Myself and I - Me, Myself and I - 1172,Medici: Masters of Florence - Medici: Masters of Florence - 985,Medicopter 117 - Medicopter 117 - Jedes Leben zählt - 132,Medium - Medium - 932,Medvídek Mouk - Mouk - 722,Melissa a Joey - Melissa & Joey - 825,Mentalista - The Mentalist - 60,Merlin - Merlin - 626,Městečko Fortitude - Fortitude - 451";
+            $publication        =   trim($this->input->post('publication'));
+			$fetch_trailer      =   trim($this->input->post('fetch_trailer'));
+			if($list =='' || $list==NULL){
+            $message        =   '<div class="alert alert-warning"><strong>Note:</strong> Enter a least one movie title..</div>';
+            $this->session->set_flashdata('message', $message);
+            redirect(base_url() . 'admin/videos_add/', 'refresh');
+        }
+        $explode            = explode(',', $list); 
+
+        //////// MAP //////////
+        // 0 = Czech title
+        // 1 = English title
+        // 2 = Movie Key - Serial ID 
+        // 3 = Dabing // NOT FOR TV SERIALS
+        //////////////////////
+        $PUBLICFUCKINSERIALID = 0;
+        foreach($explode as $movieName) {
+        // =========================================================== ADD SERIAL ==========================================================================
+        $explode_movie  = explode(' - ', $movieName);
+        $PUBLICFUCKINSERIALID = $explode_movie[2];
+        $url = 'http://ovoo.spagreen.net/movie-scrapper/get_movie_info_title.php?title='.urlencode($explode_movie[1]); // << ENGLISH MOVIE NAME FOR PARSE
+        $curl               =   curl_init($url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt( $curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows; U; Windows NT 5.1; rv:1.7.3) Gecko/20041001 Firefox/0.10.1" );
+        $data      =   curl_exec($curl);
+        curl_close($curl);
+        $data = json_decode($data, true);
+		if(isset($data['Title'])){
+                $imdbid                         = $data['imdbID'];
+                $title                          = $explode_movie[0]; // CZECH MOVIE NAME //$data['Title'];
+                $type                           = $data['Type'];
+                $imdb_data['imdbid']            = $imdbid;
+                $imdb_data['title']             = $title;
+                $imdb_data['title_en']          = $explode_movie[1];
+                $imdb_data['description']       = $data['Plot'];
+                $imdb_data['runtime']           = $data['Runtime'];
+                $imdb_data['stars']             = $this->common_model->get_star_ids('actor',$data['Actors']);
+                $imdb_data['director']          = $this->common_model->get_star_ids('director',$data['Director']);
+                $imdb_data['writer']            = $this->common_model->get_star_ids('writer',$data['Writer']);
+                $imdb_data['country']           = $this->common_model->get_country_ids($data['Country']);
+                $imdb_data['genre']             = $this->common_model->get_genre_ids($data['Genre']);
+                $imdb_data['imdb_rating']       = $data['imdbRating'];
+                $imdb_data['release']           = date("Y",strtotime($data['Released']));
+                $imdb_data['enable_download']   = '0';
+                //if (strpos($explode_movie[3], 'cs') !== false){
+                //   $imdb_data['cze_lang']          = '1'; 
+                //} else {
+                    $imdb_data['cze_lang']          = NULL;
+                //}
+                //if (strpos($explode_movie[3], 'en') !== false){
+                //  $imdb_data['cze_sub']          = '1'; 
+                //} else {
+                    $imdb_data['cze_sub']          = NULL;
+                //}
+                $imdb_data['stream']            = "";
+                $poster                         = $data['Poster'];
+                if($type=='series'){
+                    $imdb_data['is_tvseries']   = '1';                    
+                }
+
+                if(isset($fetch_trailer) && $publication =='1'){
+                    $imdb_data['trailer']       = '0'; //'1';                    
+                }else{
+                    $imdb_data['trailer']       = '0';
+                }
+                if(isset($publication) &&  $publication =='1'){
+                    $imdb_data['publication']   = '1';                    
+                }else{
+                    $imdb_data['publication']   = '0';
+                }
+				$result_row     =   count($this->db->get_where('videos', array('imdbid' =>$imdbid))->result_array());
+			
+			if($result_row == 0){
+				$this->db->insert('videos', $imdb_data);
+                $insert_id = $this->db->insert_id();
+                //save poster
+                $save_to = 'uploads/video_thumb/'.$insert_id.'.jpg';           
+                $this->common_model->grab_image($poster,$save_to);
+				
+                // REPLACE CZECH ALPHABET ///
+                $url_slug_preparing = $explode_movie[0];
+                $url_slug_preparing = str_replace( 'á', 'a', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'č', 'c', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'ď', 'd', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'é', 'e', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'í', 'i', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'ň', 'n', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'ó', 'o', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'ř', 'r', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'š', 's', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'ť', 't', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'ú', 'u', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'ů', 'u', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'ý', 'y', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'ž', 'z', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'Á', 'a', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'Č', 'c', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'Ď', 'd', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'É', 'e', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'Ě', 'e', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'Í', 'i', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'Ň', 'n', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'Ó', 'o', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'Ř', 'r', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'Š', 's', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'Ť', 't', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'Ú', 'u', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'Ů', 'u', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'Ý', 'y', $url_slug_preparing);
+                $url_slug_preparing = str_replace( 'Ž', 'z', $url_slug_preparing);
+                // ////////////////////// ///
+				$slug                       = url_title($url_slug_preparing, 'dash', TRUE);
+				$slug_num                   = $this->common_model->slug_num('videos',$slug);
+				if($slug_num > 0){
+				$slug= $slug.'-'.$insert_id;
+				}
+				$slug_data['slug']          = $slug;
+				$this->db->where('videos_id', $insert_id);
+				$this->db->update('videos', $slug_data);
+            // =========================================================== ADD EPISODES ==========================================================================
+                //$file_get_serial = file_get_contents("http://tv.sosac.to/vystupy5981/serialy/".$explode_movie[2] .".json");
+                //$ACTUAL = json_decode($file_get_serial, TRUE);
+                $PREURLPARAM = "http://tv.sosac.to/vystupy5981/serialy/".$PUBLICFUCKINSERIALID.".json";
+                $file_get_serial = file_get_contents($PREURLPARAM);
+                $ACTUAL = json_decode($file_get_serial, TRUE);
+                // ======= PARAMETERS =======
+                $array_number = 0;
+                $episode = 1;
+                $episode_counter = 1;
+                // ==========================
+                $seasons = 1;
+                $real_episode_id = 1;
+                // INSERT FIRST SEASON
+                $rada_data['videos_id'] = $insert_id;
+                $rada_data['seasons_name'] = "Řada 1";
+                $rada_data['publish'] = '1';
+                $this->db->insert('seasons', $rada_data);
+                $public_rada = $this->db->insert_id();
+
+                $MAXIMUM = max(array_keys($ACTUAL))+1;
+
+                    for ($i = 1; $i <= $MAXIMUM; $i++) { // SURE LOOP
+                            if (json_encode($ACTUAL[$array_number][$episode][$episode_counter]['n'], JSON_UNESCAPED_UNICODE) == 'null'){ // << NO MORE EPISODES
+                                if (json_encode($ACTUAL[$array_number][$episode+1][1]['n'], JSON_UNESCAPED_UNICODE) != 'null'){ 
+                                    $episode += 1; 
+                                    $episode_counter = 1; // Reset episode numbers from start
+                                    $real_episode_id = 1; // Reset real epise id from start
+                                    $seasons += 1;
+                                    $rada_data['videos_id'] = $insert_id;
+                                    $rada_data['seasons_name'] = "Řada ".$seasons;
+                                    $rada_data['publish'] = '1';
+                                    $this->db->insert('seasons', $rada_data);
+                                    $public_rada = $this->db->insert_id();
+                                    //$array_number += 1;
+                                   $MAXIMUM += 1; // Because new season we must move Maximum range (sum+1)
+                                }
+                            } else {
+                                $prepare = json_encode($ACTUAL[$array_number][$episode][$episode_counter]['n'], JSON_UNESCAPED_UNICODE);
+                                $final = str_replace( '"', '', $prepare );
+                                $final_episode_name = str_replace( chr(92), '', $final );
+
+                                $VIDEO_data['videos_id'] = $insert_id;
+                                $VIDEO_data['seasons_id'] = $public_rada;
+                                $VIDEO_data['real_episode_id'] = $real_episode_id;
+                                $VIDEO_data['episodes_name'] = $final_episode_name;
+                                $VIDEO_data['file_source'] = "mp4";
+                                $VIDEO_data['source_type'] = "link";
+                                $VIDEO_data['file_url'] = "x";
+                                $this->db->insert('episodes', $VIDEO_data);
+
+                                 $episodes_for_sure = $this->db->insert_id();
+                                $episode_counter+=1;
+                                $array_number+= 1;
+                                $real_episode_id += 1;
+                                //echo $final."<br />";
+                            }
+                    }
+
+				$message    .= '<div class="alert alert-success"><strong>'.$movieName.' </strong> Successfully added on your system.</div><br />';
+			}
+			else if($result_row > 0){
+				$message    .= '<div class="alert alert-warning"><strong>'.$movieName.' </strong> already exist on your system.</div>';
+			}
+			
+		}else{
+                $message    .= '<div class="alert alert-warning"><strong>'.$movieName.' </strong>not found.</div>';
+
+        }   
+	}
+	$this->session->set_flashdata('message', $message);
+	redirect(base_url() . 'admin/movie_scrapper_manage/', 'refresh');
+	}
+
+    public function video_upload(){
+        $response = array();
+        $videos_id             = $_POST["videos_id"];
+        if(isset($_FILES["FileInput"]) && $_FILES["FileInput"]["error"]== UPLOAD_ERR_OK)
+            {
+                ############ Edit settings ##############
+                $UploadDirectory    = 'uploads/videos/'; //specify upload directory ends with / (slash)                
+                //check if this is an ajax request
+                if (!isset($_SERVER['HTTP_X_REQUESTED_WITH'])){
+                    $response['status'] = 'error';
+                    $response['errors'] = 'Not ajax requiest';                    
+                }            
+                
+                //Is file size is less than allowed size.
+                if ($_FILES["FileInput"]["size"] > 50000000000242880) {
+                    $response['status'] = 'error';
+                    $response['errors'] = 'File size is too big!';
+                }
+                
+                //allowed file type Server side check
+                switch(strtolower($_FILES['FileInput']['type']))
+                {
+                    /*
+                    case 'image/png': 
+                    case 'image/gif': 
+                    case 'image/jpeg': 
+                    case 'image/pjpeg':
+                    case 'text/plain':
+                    case 'text/html': //html file
+                    case 'application/x-zip-compressed':
+                    case 'application/pdf':
+                    case 'application/msword':
+                    case 'application/vnd.ms-excel':*/
+                    case 'video/avi':
+                    case 'video/msvideo':
+                    case 'video/x-msvideo':
+                    case 'video/mp4':
+                    case 'video/mpeg':
+                    case 'video/x-matroska':
+                    case 'video/x-flv':
+                    case 'video/webm':
+                        break;
+                    default:
+                        $response['status'] = 'error';
+                        $response['errors'] = 'Unsupported File!';
+                }                
+                $File_Name          = strtolower($_FILES['FileInput']['name']);
+                $File_Ext           = substr($File_Name, strrpos($File_Name, '.')); //get file extention
+                $Random_Number      = rand(0, 9999999999); //Random number to be added to name.
+                $NewFileName        = $videos_id.'_'.$Random_Number.$File_Ext; //new file name
+                
+                if(move_uploaded_file($_FILES['FileInput']['tmp_name'], $UploadDirectory.$NewFileName ))
+                {
+                    $data['videos_id'] = $videos_id;
+                    $data['file_source'] = $this->common_model->get_extension($NewFileName);
+                    $data['source_type'] = 'upload';
+                    $data['file_url'] = base_url().'uploads/videos/'.$NewFileName;
+                    $this->db->insert('video_file', $data);
+                    $response['status'] = 'success';
+                    $response['video_info'] = '<tr id="row_'.$videos_id.'"><td><strong>Upload</strong></td><td>'.base_url().'uploads/videos/'.$NewFileName.'</a></td><td><a title="delete" class="btn btn-icon" onclick="delete_row('."'video_file',".$videos_id.')" class="delete"><i class="fa fa-remove"></i></td></tr>';
+                }else{
+                    $response['status'] = 'error';
+                    $response['errors'] = 'error uploading File!';
+                }                
+            }
+            else
+            {
+                $response['status'] = 'error';
+                $response['errors'] = 'Something wrong with upload! Is "upload_max_filesize" set correctly?';
+            }
+        echo json_encode($response);
+    }
+
+     public function episodes_upload(){
+        $response = array();
+        $videos_id              = $_POST["videos_id"];
+        $seasons_id             = $_POST["seasons_id"];
+        $episodes_name          = $_POST["episodes_name"];
+        if(isset($_FILES["FileInput"]) && $_FILES["FileInput"]["error"]== UPLOAD_ERR_OK)
+            {
+                ############ Edit settings ##############
+                $UploadDirectory    = 'uploads/videos/'; //specify upload directory ends with / (slash)                
+                //check if this is an ajax request
+                if (!isset($_SERVER['HTTP_X_REQUESTED_WITH'])){
+                    $response['status'] = 'error';
+                    $response['errors'] = 'Not ajax requiest';                    
+                }            
+                
+                //Is file size is less than allowed size.
+                if ($_FILES["FileInput"]["size"] > 50000000000242880) {
+                    $response['status'] = 'error';
+                    $response['errors'] = 'File size is too big!';
+                }
+                
+                //allowed file type Server side check
+                switch(strtolower($_FILES['FileInput']['type']))
+                {
+                    /*
+                    case 'image/png': 
+                    case 'image/gif': 
+                    case 'image/jpeg': 
+                    case 'image/pjpeg':
+                    case 'text/plain':
+                    case 'text/html': //html file
+                    case 'application/x-zip-compressed':
+                    case 'application/pdf':
+                    case 'application/msword':
+                    case 'application/vnd.ms-excel':*/
+                    case 'video/mp4':
+                    case 'video/mkv':
+                    case 'video/flv':
+                    case 'video/webm':
+                        break;
+                    default:
+                        $response['status'] = 'error';
+                        $response['errors'] = 'Unsupported File!';
+                }                
+                $File_Name          = strtolower($_FILES['FileInput']['name']);
+                $File_Ext           = substr($File_Name, strrpos($File_Name, '.')); //get file extention
+                $Random_Number      = rand(0, 9999999999); //Random number to be added to name.
+                $NewFileName        = $videos_id.'_'.$seasons_id.'_'.$Random_Number.$File_Ext; //new file name
+                
+                if(move_uploaded_file($_FILES['FileInput']['tmp_name'], $UploadDirectory.$NewFileName ))
+                {
+                    $data['videos_id']      = $videos_id;
+                    $data['seasons_id']     = $seasons_id;
+                    $data['episodes_name']  = $episodes_name;
+                    $data['file_source']    = $this->common_model->get_extension($NewFileName);
+                    $data['source_type']    = 'upload';
+                    $data['file_url']       = base_url().'uploads/videos/'.$NewFileName;
+                    $this->db->insert('episodes', $data);
+                    $episodes_id = $this->db->insert_id();
+                    $response['status'] = 'success';
+                    $response['video_info'] = '<tr id="row_'.$episodes_id.'"><td><strong>'.$episodes_name.'</strong><td><strong>Upload</strong></td><td>'.base_url().'uploads/videos/'.$NewFileName.'</a></td><td><a title="delete" class="btn btn-icon" onclick="delete_row('."'episodes',".$episodes_id.')" class="delete"><i class="fa fa-remove"></i></td></tr>';
+                }else{
+                    $response['status'] = 'error';
+                    $response['errors'] = 'error uploading File!';
+                }                
+            }
+            else
+            {
+                $response['status'] = 'error';
+                $response['errors'] = 'Something wrong with upload! Is "upload_max_filesize" set correctly?';
+            }
+        echo json_encode($response);
+    }
+
+    public function load_stars(){
+        $users_arr = array();
+        $stars = $this->db->get('star')->result_array();
+        foreach( $stars as $star){
+            $userid = $star['star_id'];
+            $name = $star['star_name'];
+            $users_arr[] = array("id" => $userid, "name" => $name);
+        }
+        echo json_encode($users_arr);
+    }
+
+    public function load_stars2(){
+        $users_arr = array();
+        $stars = $this->db->get('star')->result_array();
+        foreach( $stars as $star){
+            //$userid = $star['star_id'];
+            //$name = $star['star_name'];
+            //$users_arr[] = array("id" => $userid, "name" => $name);
+            echo '<option value="'.$star['star_id'].'">'.$star['star_name'].'</option>';
+        }
+        //echo json_encode($users_arr);
+    }
+    
+}
