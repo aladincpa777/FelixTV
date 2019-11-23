@@ -17,7 +17,7 @@ All user data has been Deleted, so this is "Clean" version.
   - Playing Movies/TV Shows 
   - Information about Actors/Directors
   - Movies by Genres/Actors/Directors or Country
-  - Fast adding new Movies/TV Shows via Scraping
+  - Adding new Movies/TV Shows really Fast via Scraping
   - Movie Comments
   - Blog system
   - Emailing (Newsletter)
