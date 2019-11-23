@@ -18,6 +18,7 @@ All user data has been Deleted, so this is "Clean" version.
   - Information about Actors/Directors
   - Movies by Genres/Actors/Directors or Country
   - Adding new Movies/TV Shows really Fast via Scraping
+  - Movies/TV Shows in Multiple languages (Czech/English mostly) with Czech Subtitles
   - Movie Comments
   - Blog system
   - Emailing (Newsletter)
