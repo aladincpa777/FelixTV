@@ -1,6 +1,7 @@
 # FelixTV
 ![FelixTV Logo](https://github.com/zgruza/FelixTV/blob/master/ScreenShots/felixtv_logo_raw.png?raw=true) </br>
 FelixTV is a Streaming Service that extracts data from [Streamuj.tv](http://streamuj.tv/) and [Sosac.tv](http://sosac.tv/) website. </br>
+![Felix Diagram](https://github.com/zgruza/FelixTV/blob/master/ScreenShots/Diagram.png?raw=true)</br>
 All user data has been Deleted, so this is "Clean" version.</br>
 Movies + TV Shows Database Included</br> 
 #### The whole script is in Czech language except individual parts in Administration.
