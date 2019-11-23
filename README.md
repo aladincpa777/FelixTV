@@ -23,7 +23,6 @@ All user data has been Deleted, so this is "Clean" version.
   - Blog system
   - Emailing (Newsletter)
   - Social Login (Facebook, Google)
-  - 
   
 ## Stats
   - 16 223 Movies
