@@ -13,6 +13,17 @@ All user data has been Deleted, so this is "Clean" version.
 
 [Please Read Full Installation Instructions](https://github.com/zgruza/FelixTV/blob/master/Installantion.md)
 
+## Features
+  - Playing Movies/TV Shows 
+  - Information about Actors/Directors
+  - Movies by Genres/Actors/Directors or Country
+  - Adding new Movies/TV Shows via Scraping
+  - Movie Comments
+  - Blog system
+  - Emailing (Newsletter)
+  - Social Login (Facebook, Google)
+  - 
+  
 ## Stats
   - 16 223 Movies
   - 1 230 TV Shows
