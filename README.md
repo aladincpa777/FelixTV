@@ -29,6 +29,22 @@ Movies + TV Shows Database Included</br>
 ## Stats
   - 16 223 Movies
   - 1 230 TV Shows
+ 
+## Fast Info
+   - Framework: CodeIgniter
+   - Supported DBs Drivers: </br>
+      - cubrid</br>
+      - ibase</br> 
+      - mssql</br> 
+      - mysql</br> 
+      - mysqli</br> 
+      - oci8</br> 
+      - odbc</br> 
+      - pdo</br> 
+      - postgre</br> 
+      - sqlite</br> 
+      - sqlite3</br> 
+      - sqlsrv</br>
 
 ## Fast Screenshots
 ![Home screen](https://github.com/zgruza/FelixTV/blob/master/ScreenShots/Home.png?raw=true)
