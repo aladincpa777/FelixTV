@@ -11,6 +11,7 @@
  ###### Edit database.php in \application\config and change creds into your SQL Database
  ###### Edit home.php in \application\views\front_end\ and Edit SQL Creds
  ###### Edit watch.php and tvseries_watch.php in \application\views\front_end\ and Change s.felixtv.cz into your Own Stream server
+ ###### Set Directories /CAPTIONS_DB/ (in Root) /application/ci_sessions /application/logs /application/cache on 777 CHMOD
  ###### Download Video Thumbs [here](https://mega.nz/#!SKQwFajb!ByusgX_CQ-oAhOiXg3UA_TxgcfYbR1gRFZgBto7WQRw) and extract it (with folder video_thumb) into uploads\
  ###### [Default login credetains into Administration](https://github.com/zgruza/FelixTV/blob/master/Login.txt)
 
