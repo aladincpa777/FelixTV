@@ -18,11 +18,13 @@ Movies + TV Shows Database Included</br>
 ## Features
   - Playing Movies/TV Shows 
   - Information about Actors/Directors
-  - Movies by Genres/Actors/Directors or Country
+  - Movies by Genres/Actors/Directors/Year or Country
   - Adding new Movies/TV Shows really Fast via Scraping
+  - Adding new Movies/TV Shows via TMDB ID
+  - Facebook or Web Comments system
   - Movies/TV Shows in Multiple languages (Czech/English mostly) with Czech Subtitles
   - Movie Comments
-  - Blog system
+  - Blog/Posting system
   - Emailing (Newsletter)
   - Social Login (Facebook, Google)
   
