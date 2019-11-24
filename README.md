@@ -45,6 +45,9 @@ Movies + TV Shows Database Included</br>
       - sqlite</br> 
       - sqlite3</br> 
       - sqlsrv</br>
+   - Supported PHP: </br>
+      - PHP 7.x 
+      - PHP 5.x
 
 ## Fast Screenshots
 ![Home screen](https://github.com/zgruza/FelixTV/blob/master/ScreenShots/Home.png?raw=true)
