@@ -25,6 +25,7 @@ Movies + TV Shows Database Included</br>
   - Movies/TV Shows in Multiple languages (Czech/English mostly) with Czech Subtitles
   - Movie Comments
   - Blog/Posting system
+  - Backup system
   - Emailing (Newsletter)
   - Social Login (Facebook, Google)
   
