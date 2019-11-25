@@ -4,6 +4,8 @@ FelixTV is a Streaming Service that extracts data from [Streamuj.tv](http://stre
 ![Felix Diagram](https://github.com/zgruza/FelixTV/blob/master/ScreenShots/Diagram.png?raw=true)</br>
 All user data has been Deleted, so this is "Clean" version.</br>
 Movies + TV Shows Database Included</br> 
+##### How It Works
+![Felix Relay Diagram - How It Works](https://github.com/zgruza/FelixTV/blob/master/ScreenShots/How_It_Works.png?raw=true)</br>
 #### The whole script is in Czech language except individual parts in Administration.
 ## Requirements
 
