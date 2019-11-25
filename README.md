@@ -32,6 +32,11 @@ Movies + TV Shows Database Included</br>
 ## Stats
   - 16 223 Movies
   - 1 230 TV Shows
+  - 42 508 Actors
+  - 40 927 Directors
+  - 40 928 Writers
+  - 138 Coutries
+  - 41 022 Episodes of TV Shows
  
 ## Fast Info
    - Framework: CodeIgniter
