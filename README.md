@@ -65,7 +65,7 @@ Movies + TV Shows Database Included</br>
 ![Administration screen](https://github.com/zgruza/FelixTV/blob/master/ScreenShots/Admin.png?raw=true)
 
 ## KODI Plugin
-For this project exists also Plugin for KODI you can find it [here](https://github.com/Saros72/plugin.video.felixtv)
+For this project exists also Plugin for KODI you can find it [here](http://saros.wz.cz/repo/plugin.video.felixtv/)
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
